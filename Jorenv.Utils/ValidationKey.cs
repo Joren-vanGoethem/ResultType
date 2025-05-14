@@ -1,4 +1,4 @@
-namespace Result
+namespace Jorenv.Utils
 {
     public class ValidationKey
     {

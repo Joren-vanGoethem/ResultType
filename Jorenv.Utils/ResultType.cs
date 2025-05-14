@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Result
+namespace Jorenv.Utils
 {
     public abstract class ResultType
     {
