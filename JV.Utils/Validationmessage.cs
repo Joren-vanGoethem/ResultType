@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace Jorenv.Utils
+namespace JV.Utils
 {
     public class ValidationMessage
     {

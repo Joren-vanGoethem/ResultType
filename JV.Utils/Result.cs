@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Jorenv.Utils
+namespace JV.Utils
 {
     public class Result<TValue> : ResultType
     {
@@ -103,7 +103,7 @@ namespace Jorenv.Utils
             => new Result(result.ValidationMessages);
 
         /// <summary>
-        /// Creates an untyped error Jorenv.Utils containing the validation messages of a given typed Jorenv.Utils.
+        /// Creates an untyped error JV.Utils containing the validation messages of a given typed JV.Utils.
         /// </summary>
         public static Result Error<TValue>(Result<TValue> result)
             => new Result(result.ValidationMessages);

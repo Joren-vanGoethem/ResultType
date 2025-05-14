@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Jorenv.Utils
+namespace JV.Utils
 {
     public static class ResultExtensions
     {

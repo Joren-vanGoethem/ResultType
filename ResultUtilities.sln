@@ -1,6 +1,6 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jorenv.Utils", "Jorenv.Utils\Jorenv.Utils.csproj", "{5FF33011-5E7F-4D31-ABFF-895D31811FD8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JV.Utils", "JV.Utils\JV.Utils.csproj", "{5FF33011-5E7F-4D31-ABFF-895D31811FD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
