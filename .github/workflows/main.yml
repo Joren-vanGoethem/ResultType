@@ -24,7 +24,7 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
     - name: Push
-      run: dotnet nuget push Result.${VERSION}.nupkg --source https://nuget.pkg.github.com/joren-vangoethem/index.json --api-key ${{ secrets.GH_PAT_NUGET_PUSH }}
+      run: dotnet nuget push JV.ResultType.${VERSION}.nupkg --source https://nuget.pkg.github.com/joren-vangoethem/index.json --api-key ${{ secrets.GH_PAT_NUGET_PUSH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Push to nuget.org
