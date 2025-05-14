@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>enable</Nullable>
+        <Title>Result</Title>
+        <Authors>Joren vanGoethem</Authors>
+        <Description>A basic Result type for propagating errors to the user.</Description>
+        <RepositoryUrl>https://github.com/Joren-vanGoethem/ResultType</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Result Type</PackageTags>
+        <Company>Joren vanGoethem</Company>
+        <Copyright>Copyright (c) Joren vanGoethem 2025</Copyright>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageLicenseUrl>https://opensource.org/license/mit</PackageLicenseUrl>
+
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath="\"/>
+        <None Update="icon.png">
+          <Pack>True</Pack>
+          <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
+
+</Project>
