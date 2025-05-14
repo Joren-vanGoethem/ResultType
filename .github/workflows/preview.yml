@@ -1,3 +1,5 @@
+name: Nuget preview
+
 on:
   push:
     tags:
