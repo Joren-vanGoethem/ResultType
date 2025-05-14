@@ -14,13 +14,12 @@ jobs:
     - name: Set VERSION variable from tag
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
-      run: dotnet pack --configuration Release /p:Version=${VERSION} --output .
-    - name: Push
-      run: dotnet nuget push Result.${VERSION}.nupkg --source https://nuget.pkg.github.com/joren-vangoethem/index.json --api-key ${{ secrets.GH_PAT_NUGET_PUSH }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet pack --configuration Release --output ./nupkgs
+
+    # Push to GitHub Packages
+    - name: Push to GitHub Packages
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/joren-vangoethem/index.json" --api-key "${{ secrets.GH_PAT_NUGET_PUSH }}" --skip-duplicate 
+      
+      # Push to nuget.org
     - name: Push to nuget.org
-      run: dotnet nuget push ./nupkgs/*.nupkg \
-        --source "https://api.nuget.org/v3/index.json" \
-        --api-key "${{ secrets.NUGET_API_KEY }}" \
-        --skip-duplicate
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
