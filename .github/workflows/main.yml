@@ -1,3 +1,5 @@
+name: Nuget release
+
 on:
   push:
     tags:
@@ -9,10 +11,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Verify commit exists in origin/main
+    - name: Verify commit exists in origin/master
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-        git branch --remote --contains | grep origin/main
+        git branch --remote --contains | grep origin/master
     - name: Set VERSION variable from tag
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Build
@@ -22,6 +24,6 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
     - name: Push
-      run: dotnet nuget push Result.${VERSION}.nupkg --source https://nuget.pkg.github.com/jorenvangoethem/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push Result.${VERSION}.nupkg --source https://nuget.pkg.github.com/joren-vangoethem/index.json --api-key ${{ secrets.GH_PAT_NUGET_PUSH }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
