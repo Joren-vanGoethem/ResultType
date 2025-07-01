@@ -5,6 +5,10 @@ namespace ResultTests;
 
 public class ResultTypeTests
 {
+  /// <summary>
+  /// Validates that the IsSuccessful property returns true for a Result that contains no validation errors.
+  /// This test ensures the success state detection works correctly for error-free results.
+  /// </summary>
   [Fact]
   public void IsSuccessful_WithNoErrors_ReturnsTrue()
   {
@@ -18,6 +22,10 @@ public class ResultTypeTests
     Assert.True(isSuccessful);
   }
 
+  /// <summary>
+  /// Validates that the IsSuccessful property returns false for a Result that contains validation errors.
+  /// This test ensures the success state detection correctly identifies failed results.
+  /// </summary>
   [Fact]
   public void IsSuccessful_WithErrors_ReturnsFalse()
   {
@@ -34,6 +42,10 @@ public class ResultTypeTests
     Assert.False(isSuccessful);
   }
 
+  /// <summary>
+  /// Validates that the IsFailure property returns true for a Result that contains validation errors.
+  /// This test ensures the failure state detection works correctly and is the inverse of IsSuccessful.
+  /// </summary>
   [Fact]
   public void IsFailure_WithErrors_ReturnsTrue()
   {
@@ -50,6 +62,11 @@ public class ResultTypeTests
     Assert.True(isFailure);
   }
 
+  /// <summary>
+  /// Validates that the ToString method returns a formatted string representation of the Result
+  /// that includes the translation key for debugging and logging purposes.
+  /// This test ensures basic string representation works without parameter expansion.
+  /// </summary>
   [Fact]
   public void ToString_ReturnsFormattedMessage()
   {
@@ -66,6 +83,11 @@ public class ResultTypeTests
     Assert.Contains("error.key", toString);
   }
 
+  /// <summary>
+  /// Validates that the ToStringWithParameters method returns a formatted string representation 
+  /// that includes both the translation key and the expanded parameter values.
+  /// This test ensures detailed string representation works for comprehensive error reporting.
+  /// </summary>
   [Fact]
   public void ToStringWithParameters_ReturnsFormattedMessageWithParameters()
   {
@@ -83,6 +105,10 @@ public class ResultTypeTests
     Assert.Contains("Some error", toString);
   }
 
+  /// <summary>
+  /// Validates that Result&lt;T&gt; properly stores and retrieves the value when created successfully.
+  /// This test ensures the generic Result type correctly handles value storage for successful operations.
+  /// </summary>
   [Fact]
   public void ResultOfT_WithValue_StoresValue()
   {
@@ -93,6 +119,11 @@ public class ResultTypeTests
     Assert.Equal("test value", result.Value);
   }
 
+  /// <summary>
+  /// Validates that the Merge operation correctly combines validation messages from multiple Result instances.
+  /// This test ensures that when merging results, all validation messages are preserved and combined properly,
+  /// which is essential for collecting multiple validation errors across different operations.
+  /// </summary>
   [Fact]
   public void ResultOfT_Merge_CombinesValidationMessages()
   {

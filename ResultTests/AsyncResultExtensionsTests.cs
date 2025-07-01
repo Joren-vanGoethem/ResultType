@@ -6,19 +6,25 @@ namespace ResultTests;
 public class AsyncResultExtensionsTests
 {
   private readonly TranslationKeyDefinition _errorKey = TranslationKeyDefinition
-    .Create("error.test")
+    .Create("error.test", "Test Error")
     .WithStringParameter("message");
   
   private readonly TranslationKeyDefinition _errorNegativeKey = TranslationKeyDefinition
     .Create("error.negative")
     .WithStringParameter("message");
   
- private readonly TranslationKeyDefinition _errorTooSmallKey = TranslationKeyDefinition
+  private readonly TranslationKeyDefinition _errorTooSmallKey = TranslationKeyDefinition
     .Create("error.too.small")
     .WithStringParameter("message");
 
   #region MapAsync Tests
 
+  /// <summary>
+  /// Validates that the MapAsync extension method correctly transforms the value of a successful Task&lt;Result&lt;T&gt;&gt;
+  /// using an async mapper function while preserving the success state.
+  /// This test ensures that successful async results can be transformed to new values asynchronously 
+  /// without affecting their success status or validation messages.
+  /// </summary>
   [Fact]
   public async Task MapAsync_WithSuccessfulResult_MapsValueCorrectly()
   {
@@ -38,6 +44,11 @@ public class AsyncResultExtensionsTests
     Assert.Empty(result.ValidationMessages);
   }
 
+  /// <summary>
+  /// Validates that the MapAsync extension method preserves validation errors from failed Task&lt;Result&lt;T&gt;&gt;
+  /// without executing the async mapper function, maintaining the original error state.
+  /// This test ensures that failed async results properly short-circuit the transformation pipeline.
+  /// </summary>
   [Fact]
   public async Task MapAsync_WithFailedResult_PreservesErrors()
   {
@@ -58,6 +69,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Original error", result.ValidationMessages.First().Parameters[0]);
   }
 
+  /// <summary>
+  /// Validates that the MapAsync extension method can transform a successful Task&lt;Result&lt;T&gt;&gt;'s value 
+  /// to a completely different type asynchronously while maintaining the success state.
+  /// This test ensures that async type transformation works correctly in the mapping pipeline.
+  /// </summary>
   [Fact]
   public async Task MapAsync_WithSuccessfulResult_CanMapToDifferentType()
   {
@@ -76,10 +92,36 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Number: 42", result.Value);
   }
 
+  /// <summary>
+  /// Validates that the MapAsync extension method properly propagates exceptions thrown by the async mapper function.
+  /// This test ensures that exceptions in the async transformation logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
+  [Fact]
+  public async Task MapAsync_WhenMapperThrows_PropagatesException()
+  {
+    // Arrange
+    var successResult = Task.FromResult(Result.Ok(10));
+
+    // Act & Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+      await successResult.MapAsync(async value =>
+      {
+        await Task.Delay(1);
+        throw new InvalidOperationException("Mapper failed");
+        return value; // just to help intellisense with type inference
+      }));
+  }
+
   #endregion
 
   #region BindAsync Tests
 
+  /// <summary>
+  /// Validates that the BindAsync extension method correctly executes the async binder function for successful Task&lt;Result&lt;T&gt;&gt;
+  /// and returns the result of the binder function, enabling monadic composition with async operations.
+  /// This test ensures that successful async results can be chained with other async operations that return Results.
+  /// </summary>
   [Fact]
   public async Task BindAsync_WithSuccessfulResult_ExecutesBinder()
   {
@@ -99,6 +141,11 @@ public class AsyncResultExtensionsTests
     Assert.Empty(result.ValidationMessages);
   }
 
+  /// <summary>
+  /// Validates that the BindAsync extension method does not execute the async binder function for failed Task&lt;Result&lt;T&gt;&gt;
+  /// and preserves the original validation errors, maintaining the failure state.
+  /// This test ensures that failed async results properly short-circuit the bind operation.
+  /// </summary>
   [Fact]
   public async Task BindAsync_WithFailedResult_DoesNotExecuteBinder()
   {
@@ -122,6 +169,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Original error", result.ValidationMessages.First().Parameters[0]);
   }
 
+  /// <summary>
+  /// Validates that the BindAsync extension method correctly handles the case where a successful Task&lt;Result&lt;T&gt;&gt;
+  /// is bound to an async function that returns a failed Result, properly transitioning from success to failure.
+  /// This test ensures that async bind operations can introduce new validation errors based on business logic.
+  /// </summary>
   [Fact]
   public async Task BindAsync_WithSuccessfulResultButBinderFails_ReturnsBinderError()
   {
@@ -140,10 +192,36 @@ public class AsyncResultExtensionsTests
     Assert.Single(result.ValidationMessages);
   }
 
+  /// <summary>
+  /// Validates that the BindAsync extension method properly propagates exceptions thrown by the async binder function.
+  /// This test ensures that exceptions in the async binding logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
+  [Fact]
+  public async Task BindAsync_WhenBinderThrows_PropagatesException()
+  {
+    // Arrange
+    var successResult = Task.FromResult(Result.Ok(10));
+
+    // Act & Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+      await successResult.BindAsync(async value =>
+      {
+        await Task.Delay(1);
+        throw new InvalidOperationException("Binder failed");
+        return Result.Create(value, []); // just to help intellisense with type inference
+      }));
+  }
+
   #endregion
 
-  #region MatchAsync Tests - Task<Result<T>> with async handlers
+  #region MatchAsync Tests
 
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the async onSuccess function for successful Task&lt;Result&lt;T&gt;&gt;
+  /// and returns the result of the onSuccess function, enabling async pattern matching on Result state.
+  /// This test ensures that successful async results are properly handled in the async pattern matching pipeline.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_TaskResultWithAsyncHandlers_SuccessfulResult_CallsOnSuccess()
   {
@@ -173,6 +251,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Success: test", result);
   }
 
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the async onFailure function for failed Task&lt;Result&lt;T&gt;&gt;
+  /// and returns the result of the onFailure function, enabling proper async error handling in pattern matching.
+  /// This test ensures that failed async results are properly handled in the async pattern matching pipeline.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_TaskResultWithAsyncHandlers_FailedResult_CallsOnFailure()
   {
@@ -203,10 +286,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Failure: Test error", result);
   }
 
-  #endregion
-
-  #region MatchAsync Tests - Task<Result<T>> with sync handlers
-
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the synchronous onSuccess function for successful Task&lt;Result&lt;T&gt;&gt;
+  /// when using sync handlers with async results, enabling mixed sync/async pattern matching.
+  /// This test ensures compatibility between async Results and synchronous handler functions.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_TaskResultWithSyncHandlers_SuccessfulResult_CallsOnSuccess()
   {
@@ -234,6 +318,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal(84, result);
   }
 
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the synchronous onFailure function for failed Task&lt;Result&lt;T&gt;&gt;
+  /// when using sync handlers with async results, enabling mixed sync/async error handling.
+  /// This test ensures compatibility between async Results and synchronous error handler functions.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_TaskResultWithSyncHandlers_FailedResult_CallsOnFailure()
   {
@@ -262,10 +351,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal(1, result);
   }
 
-  #endregion
-
-  #region MatchAsync Tests - Result<T> with async handlers
-
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the async onSuccess function for successful Result&lt;T&gt;
+  /// when using async handlers with sync results, enabling async operations on synchronous Results.
+  /// This test ensures that synchronous Results can be processed with async handler functions.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_ResultWithAsyncHandlers_SuccessfulResult_CallsOnSuccess()
   {
@@ -295,6 +385,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("HELLO", result);
   }
 
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the async onFailure function for failed Result&lt;T&gt;
+  /// when using async handlers with sync results, enabling async error processing on synchronous Results.
+  /// This test ensures that synchronous Results can be processed with async error handler functions.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_ResultWithAsyncHandlers_FailedResult_CallsOnFailure()
   {
@@ -325,10 +420,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("ERROR: 1", result);
   }
 
-  #endregion
-
-  #region MatchAsync Tests - Task<Result> (non-generic)
-
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the async onSuccess function for successful Task&lt;Result&gt;
+  /// (non-generic Result), enabling async pattern matching on non-value Results.
+  /// This test ensures that async Results without values are properly handled in pattern matching.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_TaskResult_SuccessfulResult_CallsOnSuccess()
   {
@@ -358,6 +454,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Success", result);
   }
 
+  /// <summary>
+  /// Validates that the MatchAsync extension method correctly calls the async onFailure function for failed Task&lt;Result&gt;
+  /// (non-generic Result), enabling async error handling on non-value Results.
+  /// This test ensures that failed async Results without values are properly handled in error scenarios.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_TaskResult_FailedResult_CallsOnFailure()
   {
@@ -388,42 +489,11 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Failure: Test error", result);
   }
 
-  #endregion
-
-  #region Error Handling Tests
-
-  [Fact]
-  public async Task MapAsync_WhenMapperThrows_PropagatesException()
-  {
-    // Arrange
-    var successResult = Task.FromResult(Result.Ok(10));
-
-    // Act & Assert
-    await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-      await successResult.MapAsync(async value =>
-      {
-        await Task.Delay(1);
-        throw new InvalidOperationException("Mapper failed");
-        return value; // just to help intellisense with type inference
-      }));
-  }
-
-  [Fact]
-  public async Task BindAsync_WhenBinderThrows_PropagatesException()
-  {
-    // Arrange
-    var successResult = Task.FromResult(Result.Ok(10));
-
-    // Act & Assert
-    await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-      await successResult.BindAsync(async value =>
-      {
-        await Task.Delay(1);
-        throw new InvalidOperationException("Binder failed");
-        return Result.Create(value, []); // just to help intellisense with type inference
-      }));
-  }
-
+  /// <summary>
+  /// Validates that the MatchAsync extension method properly propagates exceptions thrown by the async onSuccess function.
+  /// This test ensures that exceptions in the async success handling logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_WhenOnSuccessThrows_PropagatesException()
   {
@@ -445,6 +515,11 @@ public class AsyncResultExtensionsTests
         }));
   }
 
+  /// <summary>
+  /// Validates that the MatchAsync extension method properly propagates exceptions thrown by the async onFailure function.
+  /// This test ensures that exceptions in the async failure handling logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
   [Fact]
   public async Task MatchAsync_WhenOnFailureThrows_PropagatesException()
   {
@@ -471,6 +546,12 @@ public class AsyncResultExtensionsTests
 
   #region Integration Tests
 
+  /// <summary>
+  /// Validates that the async transformation extension methods (MapAsync, BindAsync, MatchAsync) can be chained together
+  /// to create a complete functional pipeline for processing async Results.
+  /// This integration test demonstrates how the async transformation methods work together in real-world scenarios
+  /// where multiple async operations need to be composed while maintaining proper error handling.
+  /// </summary>
   [Fact]
   public async Task AsyncExtensions_CanBeChainedTogether()
   {
@@ -505,7 +586,12 @@ public class AsyncResultExtensionsTests
     Assert.Equal("Final value: 20", finalResult);
   }
 
- 
+  /// <summary>
+  /// Validates that when a failure occurs in a chained async transformation pipeline, 
+  /// subsequent async operations are properly short-circuited and the failure is propagated correctly.
+  /// This integration test ensures that the fail-fast behavior works correctly across 
+  /// the entire async transformation chain, preventing unnecessary async processing after a failure.
+  /// </summary>
   [Fact]
   public async Task AsyncExtensions_WithFailureInChain_StopsProcessing()
   {
@@ -554,6 +640,6 @@ public class AsyncResultExtensionsTests
     Assert.False(matchOnSuccessCalled);
     Assert.Equal("Processing failed: Value too small", finalResult);
   }
-  
+
   #endregion
 }

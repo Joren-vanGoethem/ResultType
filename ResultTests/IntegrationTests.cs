@@ -90,6 +90,12 @@ public class UserService
 
 public class IntegrationTests
 {
+  /// <summary>
+  /// Validates that the UserService.ValidateUser method returns a successful Result&lt;User&gt; 
+  /// when provided with a User object that meets all validation criteria.
+  /// This integration test ensures the entire validation pipeline works correctly for valid data,
+  /// including username length, email format, and age requirements.
+  /// </summary>
   [Fact]
   public void ValidUser_ReturnsSuccessResult()
   {
@@ -117,6 +123,13 @@ public class IntegrationTests
     Assert.Empty(result.ValidationMessages);
   }
 
+  /// <summary>
+  /// Validates that the UserService.ValidateUser method returns a failed Result&lt;User&gt; 
+  /// containing multiple validation errors when provided with a User object that violates 
+  /// multiple validation rules (username too short, invalid email, age too young).
+  /// This integration test ensures the validation pipeline properly collects and reports 
+  /// multiple validation failures simultaneously.
+  /// </summary>
   [Fact]
   public void InvalidUser_ReturnsFailureResult()
   {
@@ -137,6 +150,12 @@ public class IntegrationTests
     Assert.Equal(3, result.ValidationMessages.Count());
   }
 
+  /// <summary>
+  /// Validates that the Result type can be effectively used in method chaining scenarios
+  /// where multiple validation operations need to be combined and their results merged.
+  /// This integration test demonstrates the practical use of the MergeResults extension method
+  /// for combining multiple validation results into a single aggregated result.
+  /// </summary>
   [Fact]
   public void ResultType_CanBeUsedInMethodChaining()
   {

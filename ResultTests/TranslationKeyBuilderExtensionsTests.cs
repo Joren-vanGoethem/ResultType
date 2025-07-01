@@ -5,6 +5,11 @@ namespace ResultTests;
 
 public class TranslationKeyBuilderExtensionsTests
 {
+  /// <summary>
+  /// Validates that the WithStringParameter extension method correctly adds a string parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for string parameters.
+  /// </summary>
   [Fact]
   public void WithStringParameter_AddsParameterCorrectly()
   {
@@ -20,6 +25,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.String, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithIntParameter extension method correctly adds an integer parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for integer parameters.
+  /// </summary>
   [Fact]
   public void WithIntParameter_AddsParameterCorrectly()
   {
@@ -35,6 +45,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.Integer, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithDecimalParameter extension method correctly adds a decimal parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for decimal parameters.
+  /// </summary>
   [Fact]
   public void WithDecimalParameter_AddsParameterCorrectly()
   {
@@ -50,6 +65,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.Decimal, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithDateTimeParameter extension method correctly adds a DateTime parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for DateTime parameters.
+  /// </summary>
   [Fact]
   public void WithDateTimeParameter_AddsParameterCorrectly()
   {
@@ -65,6 +85,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.DateTime, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithTimeOnlyParameter extension method correctly adds a TimeOnly parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for TimeOnly parameters.
+  /// </summary>
   [Fact]
   public void WithTimeOnlyParameter_AddsParameterCorrectly()
   {
@@ -80,6 +105,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.TimeOnly, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithDateOnlyParameter extension method correctly adds a DateOnly parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for DateOnly parameters.
+  /// </summary>
   [Fact]
   public void WithDateOnlyParameter_AddsParameterCorrectly()
   {
@@ -95,6 +125,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.DateOnly, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithBooleanParameter extension method correctly adds a boolean parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for boolean parameters.
+  /// </summary>
   [Fact]
   public void WithBooleanParameter_AddsParameterCorrectly()
   {
@@ -110,6 +145,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.Boolean, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithGuidParameter extension method correctly adds a GUID parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for GUID parameters.
+  /// </summary>
   [Fact]
   public void WithGuidParameter_AddsParameterCorrectly()
   {
@@ -125,6 +165,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.Guid, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithEnumParameter extension method correctly adds an enum parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for enumeration parameters.
+  /// </summary>
   [Fact]
   public void WithEnumParameter_AddsParameterCorrectly()
   {
@@ -140,6 +185,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.Enum, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithUriParameter extension method correctly adds a URI parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for URI parameters.
+  /// </summary>
   [Fact]
   public void WithUriParameter_AddsParameterCorrectly()
   {
@@ -155,6 +205,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.Uri, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithTimeSpanParameter extension method correctly adds a TimeSpan parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for TimeSpan parameters.
+  /// </summary>
   [Fact]
   public void WithTimeSpanParameter_AddsParameterCorrectly()
   {
@@ -170,6 +225,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.TimeSpan, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithEmailParameter extension method correctly adds an email parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for email parameters.
+  /// </summary>
   [Fact]
   public void WithEmailParameter_AddsParameterCorrectly()
   {
@@ -185,6 +245,11 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.Email, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that the WithPhoneNumberParameter extension method correctly adds a phone number parameter 
+  /// to a TranslationKeyDefinition with the proper name and type.
+  /// This test ensures the fluent API for building translation keys works correctly for phone number parameters.
+  /// </summary>
   [Fact]
   public void WithPhoneNumberParameter_AddsParameterCorrectly()
   {
@@ -200,6 +265,12 @@ public class TranslationKeyBuilderExtensionsTests
     Assert.Equal(ParameterType.PhoneNumber, keyWithParam.Parameters[0].Type);
   }
 
+  /// <summary>
+  /// Validates that multiple parameter extension methods can be chained together to create 
+  /// a TranslationKeyDefinition with multiple parameters of different types.
+  /// This test ensures the fluent API supports method chaining and correctly maintains 
+  /// parameter order and type information across multiple chained calls.
+  /// </summary>
   [Fact]
   public void ChainedExtensions_AddMultipleParameters()
   {

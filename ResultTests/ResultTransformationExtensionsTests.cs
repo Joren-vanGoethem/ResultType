@@ -19,6 +19,12 @@ public class ResultTransformationExtensionsTests
 
   #region Map Tests
 
+  /// <summary>
+  /// Validates that the Map extension method correctly transforms the value of a successful Result
+  /// using the provided mapper function while preserving the success state.
+  /// This test ensures that successful results can be transformed to new values without affecting 
+  /// their success status or validation messages.
+  /// </summary>
   [Fact]
   public void Map_WithSuccessfulResult_MapsValueCorrectly()
   {
@@ -34,6 +40,11 @@ public class ResultTransformationExtensionsTests
     Assert.Empty(result.ValidationMessages);
   }
 
+  /// <summary>
+  /// Validates that the Map extension method preserves validation errors from failed Results
+  /// without executing the mapper function, maintaining the original error state.
+  /// This test ensures that failed results short-circuit the transformation pipeline correctly.
+  /// </summary>
   [Fact]
   public void Map_WithFailedResult_PreservesErrors()
   {
@@ -50,6 +61,11 @@ public class ResultTransformationExtensionsTests
     Assert.Equal("Original error", result.ValidationMessages.First().Parameters[0]);
   }
 
+  /// <summary>
+  /// Validates that the Map extension method can transform a successful Result's value 
+  /// to a completely different type while maintaining the success state.
+  /// This test ensures that type transformation works correctly in the mapping pipeline.
+  /// </summary>
   [Fact]
   public void Map_WithSuccessfulResult_CanMapToDifferentType()
   {
@@ -64,6 +80,11 @@ public class ResultTransformationExtensionsTests
     Assert.Equal("Number: 42", result.Value);
   }
 
+  /// <summary>
+  /// Validates that the Map extension method properly propagates exceptions thrown by the mapper function.
+  /// This test ensures that exceptions in the transformation logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
   [Fact]
   public void Map_WhenMapperThrows_PropagatesException()
   {
@@ -79,6 +100,11 @@ public class ResultTransformationExtensionsTests
 
   #region Bind Tests
 
+  /// <summary>
+  /// Validates that the Bind extension method correctly executes the binder function for successful Results
+  /// and returns the result of the binder function, enabling monadic composition.
+  /// This test ensures that successful results can be chained with other operations that return Results.
+  /// </summary>
   [Fact]
   public void Bind_WithSuccessfulResult_ExecutesBinder()
   {
@@ -95,6 +121,11 @@ public class ResultTransformationExtensionsTests
     Assert.Empty(result.ValidationMessages);
   }
 
+  /// <summary>
+  /// Validates that the Bind extension method does not execute the binder function for failed Results
+  /// and preserves the original validation errors, maintaining the failure state.
+  /// This test ensures that failed results properly short-circuit the bind operation.
+  /// </summary>
   [Fact]
   public void Bind_WithFailedResult_DoesNotExecuteBinder()
   {
@@ -117,6 +148,11 @@ public class ResultTransformationExtensionsTests
     Assert.Equal("Original error", result.ValidationMessages.First().Parameters[0]);
   }
 
+  /// <summary>
+  /// Validates that the Bind extension method correctly handles the case where a successful Result
+  /// is bound to a function that returns a failed Result, properly transitioning from success to failure.
+  /// This test ensures that bind operations can introduce new validation errors based on business logic.
+  /// </summary>
   [Fact]
   public void Bind_WithSuccessfulResultButBinderFails_ReturnsBinderError()
   {
@@ -132,6 +168,11 @@ public class ResultTransformationExtensionsTests
     Assert.Single(result.ValidationMessages);
   }
 
+  /// <summary>
+  /// Validates that the Bind extension method properly propagates exceptions thrown by the binder function.
+  /// This test ensures that exceptions in the binding logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
   [Fact]
   public void Bind_WhenBinderThrows_PropagatesException()
   {
@@ -147,6 +188,11 @@ public class ResultTransformationExtensionsTests
 
   #region Match Tests
 
+  /// <summary>
+  /// Validates that the Match extension method correctly calls the onSuccess function for successful Results
+  /// and returns the result of the onSuccess function, enabling pattern matching on Result state.
+  /// This test ensures that successful results are properly handled in the pattern matching pipeline.
+  /// </summary>
   [Fact]
   public void Match_WithSuccessfulResult_CallsOnSuccess()
   {
@@ -174,6 +220,11 @@ public class ResultTransformationExtensionsTests
     Assert.Equal("Success: test", result);
   }
 
+  /// <summary>
+  /// Validates that the Match extension method correctly calls the onFailure function for failed Results
+  /// and returns the result of the onFailure function, enabling proper error handling in pattern matching.
+  /// This test ensures that failed results are properly handled in the pattern matching pipeline.
+  /// </summary>
   [Fact]
   public void Match_WithFailedResult_CallsOnFailure()
   {
@@ -202,6 +253,11 @@ public class ResultTransformationExtensionsTests
     Assert.Equal("Failure: Test error", result);
   }
 
+  /// <summary>
+  /// Validates that the Match extension method properly propagates exceptions thrown by the onSuccess function.
+  /// This test ensures that exceptions in the success handling logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
   [Fact]
   public void Match_WhenOnSuccessThrows_PropagatesException()
   {
@@ -215,6 +271,11 @@ public class ResultTransformationExtensionsTests
         onFailure: errors => "Failure"));
   }
 
+  /// <summary>
+  /// Validates that the Match extension method properly propagates exceptions thrown by the onFailure function.
+  /// This test ensures that exceptions in the failure handling logic are not swallowed but bubble up 
+  /// to the calling code for proper error handling.
+  /// </summary>
   [Fact]
   public void Match_WhenOnFailureThrows_PropagatesException()
   {
@@ -233,6 +294,12 @@ public class ResultTransformationExtensionsTests
 
   #region Integration Tests
 
+  /// <summary>
+  /// Validates that the transformation extension methods (Map, Bind, Match) can be chained together
+  /// to create a complete functional pipeline for processing Results.
+  /// This integration test demonstrates how the transformation methods work together in real-world scenarios
+  /// where multiple operations need to be composed while maintaining proper error handling.
+  /// </summary>
   [Fact]
   public void TransformationExtensions_CanBeChainedTogether()
   {
@@ -251,6 +318,12 @@ public class ResultTransformationExtensionsTests
     Assert.Equal("Final value: 20", finalResult);
   }
 
+  /// <summary>
+  /// Validates that when a failure occurs in a chained transformation pipeline, 
+  /// subsequent operations are properly short-circuited and the failure is propagated correctly.
+  /// This integration test ensures that the fail-fast behavior works correctly across 
+  /// the entire transformation chain, preventing unnecessary processing after a failure.
+  /// </summary>
   [Fact]
   public void TransformationExtensions_WithFailureInChain_StopsProcessing()
   {
