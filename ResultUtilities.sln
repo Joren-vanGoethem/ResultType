@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JV.Utils", "JV.Utils\JV.Uti
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{44DA462E-7D73-4AC7-9E9F-309D575371BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject1", "TestProject1\TestProject1.csproj", "{0E681740-504F-4ACB-915C-AA8864C70226}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultTests", "ResultTests\ResultTests.csproj", "{0E681740-504F-4ACB-915C-AA8864C70226}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
