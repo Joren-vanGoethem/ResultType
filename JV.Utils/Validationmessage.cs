@@ -1,40 +1,47 @@
+using System;
 using System.Linq;
 
 namespace JV.Utils
 {
     public class ValidationMessage
     {
-        public SeverityLevel SeverityLevel { get; }
         public string TranslationKey { get; }
         public string[] Parameters { get; }
+        public TranslationKeyDefinition KeyDefinition { get; }
 
-        protected ValidationMessage(SeverityLevel severityLevel, string translationKey, string[] parameters)
+        protected ValidationMessage(string translationKey, string[] parameters)
         {
-            SeverityLevel = severityLevel;
             TranslationKey = translationKey;
             Parameters = parameters;
         }
 
+        protected ValidationMessage(TranslationKeyDefinition keyDefinition, object[] parameters)
+        {
+            if (keyDefinition == null) throw new ArgumentNullException(nameof(keyDefinition));
+            if (!keyDefinition.ValidateParameters(parameters))
+                throw new ArgumentException("Parameters do not match the required definition", nameof(parameters));
+
+            KeyDefinition = keyDefinition;
+            TranslationKey = keyDefinition.TranslationKey;
+            Parameters = keyDefinition.FormatParameters(parameters);
+        }
+
+        [Obsolete("Use CreateError with TranslationKeyDefinition instead")]
         public static ValidationMessage CreateError(string translationKey, string[] parameters)
         {
-            return new ValidationMessage(SeverityLevel.Error, translationKey, parameters);
+            return new ValidationMessage(translationKey, parameters);
         }
 
+        [Obsolete("Use CreateError with TranslationKeyDefinition instead")]
         public static ValidationMessage CreateError(string translationKey, params object[] parameters)
         {
-            return new ValidationMessage(SeverityLevel.Error, translationKey,
+            return new ValidationMessage(translationKey,
                 parameters.Select(p => p.ToString()).ToArray());
-        }
-
-        public static ValidationMessage CreateWarning(string translationKey, string[] parameters)
-        {
-            return new ValidationMessage(SeverityLevel.Warning, translationKey, parameters);
         }
         
-        public static ValidationMessage CreateWarning(string translationKey, params object[] parameters)
+        public static ValidationMessage CreateError(TranslationKeyDefinition keyDefinition, params object[] parameters)
         {
-            return new ValidationMessage(SeverityLevel.Warning, translationKey,
-                parameters.Select(p => p.ToString()).ToArray());
+            return new ValidationMessage(keyDefinition, parameters);
         }
 
         public string MapToErrorMessage()

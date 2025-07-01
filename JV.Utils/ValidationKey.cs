@@ -1,5 +1,8 @@
+using System;
+
 namespace JV.Utils
 {
+    [Obsolete("Use TranslationKeyDefinition instead")]
     public class ValidationKey
     {
         public string Key { get; }
