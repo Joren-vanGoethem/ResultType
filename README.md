@@ -1,10 +1,8 @@
-# JV.Utils - Type-Safe Translation Keys
+# JV.Utils - Result Type for Error Handling
 
 ## Overview
 
-This package provides a type-safe approach to handling translation keys and their parameters. The new
-`TranslationKeyDefinition` class ensures that users provide the correct number and types of parameters when creating
-validation messages.
+This package provides a robust Result type implementation for handling success and failure states in your application. It includes type-safe validation messages using `TranslationKeyDefinition` to ensure that users provide the correct number and types of parameters when creating validation messages.
 
 Results are binary - they are either successful (contain no validation messages) or unsuccessful (contain one or more
 validation messages).
@@ -162,6 +160,43 @@ public Result<User> RegisterUser(string username, string email, string password)
     return ValidateInput(username, email, password)
         .OnSuccess(() => CreateUser(username, email, password))
         .OnSuccess(user => SendWelcomeEmail(user));
+}
+```
+
+### Map and Bind Operations
+
+```csharp
+// Map transforms a successful Result<T> to a Result<U> using a mapper function
+public Result<string> GetFormattedUsername(int userId)
+{
+    return GetUser(userId)
+        .Map(user => $"{user.FirstName} {user.LastName}");
+}
+
+// MapAsync for async operations
+public async Task<Result<UserViewModel>> GetUserViewModelAsync(int userId)
+{
+    return await _userRepository.GetUserAsync(userId)
+        .MapAsync(async user => {
+            var roles = await _roleRepository.GetRolesForUserAsync(user.Id);
+            return new UserViewModel(user, roles);
+        });
+}
+
+// Bind combines Results together in a chain
+public Result<Order> CreateOrder(CreateOrderRequest request)
+{
+    return ValidateRequest(request)
+        .Bind(validRequest => CreateOrderFromRequest(validRequest))
+        .Bind(order => AssignInventory(order));
+}
+
+// BindAsync for async operations
+public async Task<Result<Order>> CreateOrderAsync(CreateOrderRequest request)
+{
+    return await ValidateRequestAsync(request)
+        .BindAsync(async validRequest => await CreateOrderFromRequestAsync(validRequest))
+        .BindAsync(async order => await AssignInventoryAsync(order));
 }
 ```
 
