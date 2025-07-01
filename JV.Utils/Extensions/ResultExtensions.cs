@@ -107,5 +107,41 @@ namespace JV.Utils
 
       return mergedResult;
     }
+    
+    public static Result<T> Ensure<T>(this Result<T> result, 
+      Func<T, bool> predicate, 
+      TranslationKeyDefinition errorKey, 
+      params object[] parameters)
+    {
+      if (result.IsFailure) return result;
+        
+      return predicate(result.Value) 
+        ? result 
+        : Result.Error(errorKey, parameters);
+    }
+    
+    public static Result<T> Filter<T>(this Result<T> result,
+      Func<T, bool> predicate,
+      TranslationKeyDefinition errorKey,
+      params object[] parameters)
+    {
+      return result.Ensure(predicate, errorKey, parameters);
+    }
+    
+    public static Result<T> Do<T>(this Result<T> result, Action<T> action)
+    {
+      if (result.IsSuccessful)
+        action(result.Value);
+      return result;
+    }
+    
+    public static async Task<Result<T>> DoAsync<T>(this Result<T> result, Func<T, Task> action)
+    {
+      if (result.IsSuccessful)
+        await action(result.Value);
+      return result;
+    }
+
+
   }
 }
