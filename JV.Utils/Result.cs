@@ -14,8 +14,11 @@ namespace JV.Utils
             ValidationMessages = validationMessages;
         }
 
-        public static Result<TValue> Ok(TValue value)
-            => new Result<TValue>(value, Enumerable.Empty<ValidationMessage>());
+        public static Result<TValue> Create(TValue value)
+            => new Result<TValue>(value, []);
+        
+        public static Result<TValue> Create(TValue value, IEnumerable<ValidationMessage> validationMessages)
+            => new Result<TValue>(value, validationMessages);
 
         public Result<TValue> Merge(params Result[] results)
         {
@@ -52,7 +55,7 @@ namespace JV.Utils
 
         public static implicit operator Result<TValue>(TValue value)
         {
-            return Ok(value);
+            return Create(value);
         }
     }
 
@@ -83,17 +86,21 @@ namespace JV.Utils
         }
 
         public static Result Create(IEnumerable<ValidationMessage> validationMessages) =>
-            new Result(validationMessages);
+            new (validationMessages);
+        
+        public static Result<TValue> Create<TValue>(TValue value, IEnumerable<ValidationMessage> validationMessages) => 
+            Result<TValue>.Create(value, validationMessages);
+        
 
-        public static Result Ok() => new Result(Enumerable.Empty<ValidationMessage>());
+        public static Result Ok() => new (Enumerable.Empty<ValidationMessage>());
 
-        public static Result<TValue> Ok<TValue>(TValue value) => Result<TValue>.Ok(value);
+        public static Result<TValue> Ok<TValue>(TValue value) => Result<TValue>.Create(value);
 
         public static Result Error(string translationKey, string[] parameters)
-            => new Result(ValidationMessage.CreateError(translationKey, parameters));
+            => new (ValidationMessage.CreateError(translationKey, parameters));
         
         public static Result Error(string translationKey)
-            => new Result(ValidationMessage.CreateError(translationKey));
+            => new (ValidationMessage.CreateError(translationKey));
 
 
         public static Result Error(string translationKey, params object[] parameters)
@@ -101,17 +108,8 @@ namespace JV.Utils
 
         public static Result Error(Result result)
             => new Result(result.ValidationMessages);
-
-        /// <summary>
-        /// Creates an untyped error JV.Utils containing the validation messages of a given typed JV.Utils.
-        /// </summary>
-        public static Result Error<TValue>(Result<TValue> result)
-            => new Result(result.ValidationMessages);
-
-        public static Result Warning(string translationKey, string[] parameters)
-            => new Result(ValidationMessage.CreateWarning(translationKey, parameters));
         
-        public static Result Warning(string translationKey)
-            => new Result(ValidationMessage.CreateWarning(translationKey));
+        public static Result Error(IEnumerable<ValidationMessage> validationMessages)
+            => new Result(validationMessages);
     }
 }
