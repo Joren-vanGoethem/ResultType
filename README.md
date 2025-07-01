@@ -2,9 +2,12 @@
 
 ## Overview
 
-This package provides a type-safe approach to handling translation keys and their parameters. The new `TranslationKeyDefinition` class ensures that users provide the correct number and types of parameters when creating validation messages.
+This package provides a type-safe approach to handling translation keys and their parameters. The new
+`TranslationKeyDefinition` class ensures that users provide the correct number and types of parameters when creating
+validation messages.
 
-Results are binary - they are either successful (contain no validation messages) or unsuccessful (contain one or more validation messages).
+Results are binary - they are either successful (contain no validation messages) or unsuccessful (contain one or more
+validation messages).
 
 ## Usage Examples
 
@@ -63,6 +66,7 @@ var validationMessage = ValidationMessage.CreateError(nameKey, "John", 3);
 ## Result Success/Failure Logic
 
 A result is considered:
+
 - **Successful** when it contains no validation messages
 - **Unsuccessful** when it contains one or more validation messages
 
@@ -159,4 +163,78 @@ public Result<User> RegisterUser(string username, string email, string password)
         .OnSuccess(() => CreateUser(username, email, password))
         .OnSuccess(user => SendWelcomeEmail(user));
 }
+```
+
+### Validation Pipeline
+
+```csharp
+public class OrderService
+{
+    private readonly ValidationPipeline<Order> _orderValidation;
+
+    public OrderService()
+    {
+        _orderValidation = new ValidationPipeline<Order>()
+            .AddRule(ValidateCustomer)
+            .AddRule(ValidateItems)
+            .AddRule(ValidatePayment);
+    }
+
+    public async Task<Result<Order>> ProcessOrderAsync(CreateOrderRequest request)
+    {
+        return await Result.Ok(request)
+            .Map(MapToOrder)
+            .BindAsync(_orderValidation.Validate)
+            .BindAsync(SaveOrderAsync)
+            .BindAsync(SendConfirmationAsync);
+    }
+}
+```
+
+### match pattern
+
+```csharp
+public class UserController : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> CreateUser(CreateUserRequest request)
+    {
+        var result = await _userService.CreateUserAsync(request);
+        
+        return result.Match(
+            onSuccess: user => Ok(user),
+            onFailure: errors => BadRequest(new { Errors = errors.Select(e => e.MapToErrorMessage()) })
+        );
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateUserAsync(CreateUserRequest request)
+    {
+        return await _userService.CreateUserAsync(request)
+            .MatchAsync(
+                onSuccess: async user => {
+                    await _emailService.SendWelcomeEmailAsync(user.Email);
+                    return Ok(user);
+                },
+                onFailure: async errors => {
+                    await _auditService.LogValidationFailureAsync(request, errors);
+                    return BadRequest(new { Errors = errors });
+                });
+    }
+}
+
+public async Task<string> ProcessOrderAsync(Order order)
+{
+    return await _orderRepository.SaveAsync(order)
+        .MatchAsync(
+            onSuccess: async savedOrder => {
+                await _logService.LogSuccessAsync($"Order {savedOrder.Id} created");
+                return $"Order {savedOrder.Id} processed successfully";
+            },
+            onFailure: async errors => {
+                await _logService.LogErrorAsync("Order creation failed", errors);
+                return "Order processing failed";
+            });
+}
+
 ```
