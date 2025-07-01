@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace JV.Utils
 {
@@ -52,11 +53,10 @@ namespace JV.Utils
       // value is null here, converted from error result, exclamation mark to supress warning
       return new Result<TValue>(default!, result.ValidationMessages);
     }
-
-    public static implicit operator Result<TValue>(TValue value)
-    {
-      return Create(value);
-    }
+    
+    public static implicit operator Result<TValue>(TValue value) => Result.Ok(value);
+    public static implicit operator Result<TValue>(ValidationMessage error) => Result.Error(error);
+    public static implicit operator Result<TValue>(ValidationMessage[] errors) => Result.Create<TValue>(default, errors);
   }
 
   public class Result : ResultType
@@ -110,5 +110,32 @@ namespace JV.Utils
 
     public static Result Error(IEnumerable<ValidationMessage> validationMessages)
       => new Result(validationMessages);
+    
+    public static Result Error(ValidationMessage validationMessage)
+      => new Result([validationMessage]);
+    
+    public static Result<T> Try<T>(Func<T> operation, TranslationKeyDefinition errorKey, params object[] parameters)
+    {
+      try
+      {
+        return Ok(operation());
+      }
+      catch (Exception ex)
+      {
+        return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
+      }
+    }
+    
+    public static async Task<Result<T>> TryAsync<T>(Func<Task<T>> operation, TranslationKeyDefinition errorKey, params object[] parameters)
+    {
+      try
+      {
+        return Ok(await operation());
+      }
+      catch (Exception ex)
+      {
+        return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
+      }
+    }
   }
 }
