@@ -59,27 +59,27 @@ private static Result ValidateUsername(User user)
         return Result.Create(ValidationMessage.CreateError(UsernameRequiredKey));
     }
     
-        if (user.Username.Length < 3)
-        {
-            return Result.Create(ValidationMessage.CreateError(UsernameInvalidKey, user.Username, 3));
-        }
-        
-        return Result.CreateSuccess();
+    if (user.Username.Length < 3)
+    {
+        return Result.Create(ValidationMessage.CreateError(UsernameInvalidKey, user.Username, 3));
     }
     
-    private static Result ValidateEmail(User user)
-    {
-        if (string.IsNullOrWhiteSpace(user.Email))
-        {
-            return Result.Create(ValidationMessage.CreateError(EmailRequiredKey));
-        }
+    return Result.CreateSuccess();
+}
     
-        if (!IsValidEmail(user.Email))
-        {
-            return Result.Create(ValidationMessage.CreateError(EmailInvalidKey, user.Email));
-        }
-        
-        return Result.CreateSuccess();
+private static Result ValidateEmail(User user)
+{
+    if (string.IsNullOrWhiteSpace(user.Email))
+    {
+        return Result.Create(ValidationMessage.CreateError(EmailRequiredKey));
+    }
+
+    if (!IsValidEmail(user.Email))
+    {
+        return Result.Create(ValidationMessage.CreateError(EmailInvalidKey, user.Email));
+    }
+    
+    return Result.CreateSuccess();
 }
 ```
 
