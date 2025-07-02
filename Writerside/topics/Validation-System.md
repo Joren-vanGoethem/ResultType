@@ -275,7 +275,7 @@ private static Result ExpensiveValidation(User user)
     // Only run expensive validation if basic validation passes
     var basicResult = ValidateBasicInfo(user);
     if (basicResult.IsFailure)
-    return basicResult;
+        return basicResult;
     
     // Proceed with expensive validation
     return PerformExpensiveChecks(user);
