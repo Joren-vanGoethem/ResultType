@@ -8,7 +8,7 @@ all validation messages in a single operation.
 
 ## Core Components
 
-### ValidationPipeline<T>
+### ValidationPipeline
 
 The `ValidationPipeline<T>` class is the main component that orchestrates the validation process. It allows you to:
 
