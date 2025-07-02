@@ -13,7 +13,7 @@ public static class ResultCollectionExtensions
         Func<T, Result<TResult>> transform)
     {
         var results = new List<TResult>();
-        var errors = new List<ValidationMessage>();
+        var errors = new List<ValidationMessage.ValidationMessage>();
 
         foreach (var item in source)
         {
@@ -34,7 +34,7 @@ public static class ResultCollectionExtensions
         Func<T, Task<Result<TResult>>> transform)
     {
         var results = new List<TResult>();
-        var errors = new List<ValidationMessage>();
+        var errors = new List<ValidationMessage.ValidationMessage>();
 
         foreach (var item in source)
         {

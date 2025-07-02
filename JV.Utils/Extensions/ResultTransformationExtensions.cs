@@ -35,7 +35,7 @@ namespace JV.Utils.Extensions
         public static TResult Match<TValue, TResult>(
             this Result<TValue> result,
             Func<TValue, TResult> onSuccess,
-            Func<IEnumerable<ValidationMessage>, TResult> onFailure)
+            Func<IEnumerable<ValidationMessage.ValidationMessage>, TResult> onFailure)
         {
             return result.IsSuccessful
                 ? onSuccess(result.Value)
@@ -48,7 +48,7 @@ namespace JV.Utils.Extensions
         public static TResult Match<TResult>(
             this Result result,
             Func<TResult> onSuccess,
-            Func<IEnumerable<ValidationMessage>, TResult> onFailure)
+            Func<IEnumerable<ValidationMessage.ValidationMessage>, TResult> onFailure)
         {
             return result.IsSuccessful
                 ? onSuccess()

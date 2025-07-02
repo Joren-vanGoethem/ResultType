@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JV.Utils.ValidationMessage;
 
-namespace JV.Utils
+namespace JV.Utils.Extensions
 {
     public static class ResultExtensions
     {

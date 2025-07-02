@@ -79,7 +79,7 @@ public static class AsyncResultExtensions
     public static async Task<TResult> MatchAsync<TValue, TResult>(
         this Task<Result<TValue>> resultTask,
         Func<TValue, Task<TResult>> onSuccess,
-        Func<IEnumerable<ValidationMessage>, Task<TResult>> onFailure)
+        Func<IEnumerable<ValidationMessage.ValidationMessage>, Task<TResult>> onFailure)
     {
         var result = await resultTask;
         return result.IsSuccessful
@@ -91,7 +91,7 @@ public static class AsyncResultExtensions
     public static async Task<TResult> MatchAsync<TValue, TResult>(
         this Task<Result<TValue>> resultTask,
         Func<TValue, TResult> onSuccess,
-        Func<IEnumerable<ValidationMessage>, TResult> onFailure)
+        Func<IEnumerable<ValidationMessage.ValidationMessage>, TResult> onFailure)
     {
         var result = await resultTask;
         return result.IsSuccessful
@@ -103,7 +103,7 @@ public static class AsyncResultExtensions
     public static async Task<TResult> MatchAsync<TValue, TResult>(
         this Result<TValue> result,
         Func<TValue, Task<TResult>> onSuccess,
-        Func<IEnumerable<ValidationMessage>, Task<TResult>> onFailure)
+        Func<IEnumerable<ValidationMessage.ValidationMessage>, Task<TResult>> onFailure)
     {
         return result.IsSuccessful
             ? await onSuccess(result.Value)
@@ -114,7 +114,7 @@ public static class AsyncResultExtensions
     public static async Task<TResult> MatchAsync<TResult>(
         this Task<Result> resultTask,
         Func<Task<TResult>> onSuccess,
-        Func<IEnumerable<ValidationMessage>, Task<TResult>> onFailure)
+        Func<IEnumerable<ValidationMessage.ValidationMessage>, Task<TResult>> onFailure)
     {
         var result = await resultTask;
         return result.IsSuccessful

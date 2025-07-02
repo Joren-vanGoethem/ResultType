@@ -2,7 +2,7 @@ using System;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 
-namespace JV.Utils
+namespace JV.Utils.ValidationMessage
 {
     public enum ParameterType
     {

@@ -7,7 +7,7 @@ namespace JV.Utils
     {
         public bool IsSuccessful => !ValidationMessages.Any();
         public bool IsFailure => !IsSuccessful;
-        public IEnumerable<ValidationMessage> ValidationMessages { get; protected set; } = null!;
+        public IEnumerable<ValidationMessage.ValidationMessage> ValidationMessages { get; protected set; } = null!;
 
         public override string ToString()
         {

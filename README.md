@@ -411,41 +411,25 @@ public class UserRepository
 Cache expensive operations with automatic Result handling:
 
 ```csharp
-// Cache expensive calculations
-public Result<ComplexCalculationResult> GetComplexCalculation(int inputId)
-{
-    return (() => PerformComplexCalculation(inputId))
-        .Memoize($"calculation_{inputId}", TimeSpan.FromHours(1));
-}
+// Memoize expensive calculations
+Func<int, int> fibonacci = null;
+fibonacci = n => n <= 1 ? n : fibonacci(n - 1) + fibonacci(n - 2);
+var memoizedFibonacci = fibonacci.Memoize();
 
-// Cache API calls
-public async Task<Result<WeatherData>> GetWeatherDataAsync(string cityCode)
-{
-    return await (async () => await _weatherApi.GetWeatherAsync(cityCode))
-        .MemoizeAsync($"weather_{cityCode}", TimeSpan.FromMinutes(15));
-}
+// Memoize validation functions
+var userService = new UserService();
+Func<User, Result<User>> validation = userService.ValidateUser;
+var memoizedValidation = validation.MemoizeResult();
 
-// Cache user permissions
-public Result<UserPermissions> GetUserPermissions(int userId)
-{
-    return (() => _permissionService.CalculatePermissions(userId))
-        .Memoize($"permissions_{userId}", TimeSpan.FromMinutes(30));
-}
+// with statistics, useful to know whether it is worth using memoization
+var expensiveOperation = MemoizationFactory.CreateConfigurable<string, int>(s => s.Length);
 
-// Service layer with caching
-public class ProductService
-{
-    public Result<Product> GetProduct(int productId)
-    {
-        return (() => 
-        {
-            var product = _repository.GetById(productId);
-            if (product == null)
-                return Result.Error<Product>(productNotFoundKey, productId);
-            return Result.Ok(product);
-        }).Memoize($"product_{productId}", TimeSpan.FromMinutes(10));
-    }
-}
+var result1 = expensiveOperation.Invoke("hello");
+var result2 = expensiveOperation.Invoke("hello"); // Cache hit
+
+Console.WriteLine($"Hit ratio: {expensiveOperation.HitRatio}%");
+Console.WriteLine($"Cache size: {expensiveOperation.CacheSize}");
+
 ```
 
 ### Result Aggregation

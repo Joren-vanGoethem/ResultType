@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JV.Utils.ValidationMessage;
 
 namespace JV.Utils
 {
@@ -9,7 +10,7 @@ namespace JV.Utils
     {
         public TValue Value { get; }
 
-        private Result(TValue value, IEnumerable<ValidationMessage> validationMessages)
+        private Result(TValue value, IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
         {
             Value = value;
             ValidationMessages = validationMessages;
@@ -18,7 +19,7 @@ namespace JV.Utils
         public static Result<TValue> Create(TValue value)
             => new Result<TValue>(value, []);
 
-        public static Result<TValue> Create(TValue value, IEnumerable<ValidationMessage> validationMessages)
+        public static Result<TValue> Create(TValue value, IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
             => new Result<TValue>(value, validationMessages);
 
         public Result<TValue> Merge(params Result[] results)
@@ -26,7 +27,7 @@ namespace JV.Utils
             return new Result<TValue>(Value, ValidationMessages.Concat(results.SelectMany(r => r.ValidationMessages)));
         }
 
-        public void Deconstruct(out bool isSuccessful, out IEnumerable<ValidationMessage> messages, out TValue value)
+        public void Deconstruct(out bool isSuccessful, out IEnumerable<ValidationMessage.ValidationMessage> messages, out TValue value)
         {
             isSuccessful = IsSuccessful;
             messages = ValidationMessages;
@@ -55,20 +56,20 @@ namespace JV.Utils
         }
 
         public static implicit operator Result<TValue>(TValue value) => Result.Ok(value);
-        public static implicit operator Result<TValue>(ValidationMessage error) => Result.Error(error);
+        public static implicit operator Result<TValue>(ValidationMessage.ValidationMessage error) => Result.Error(error);
 
-        public static implicit operator Result<TValue>(ValidationMessage[] errors) =>
+        public static implicit operator Result<TValue>(ValidationMessage.ValidationMessage[] errors) =>
             Result.Create<TValue>(default, errors);
     }
 
     public class Result : ResultType
     {
-        private Result(IEnumerable<ValidationMessage> validationMessages)
+        private Result(IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
         {
             ValidationMessages = validationMessages;
         }
 
-        private Result(ValidationMessage validationMessage)
+        private Result(ValidationMessage.ValidationMessage validationMessage)
         {
             ValidationMessages = new[] { validationMessage };
         }
@@ -81,39 +82,39 @@ namespace JV.Utils
             return new Result(ValidationMessages.Concat(result.ValidationMessages));
         }
 
-        public void Deconstruct(out bool isSuccessful, out IEnumerable<ValidationMessage> messages)
+        public void Deconstruct(out bool isSuccessful, out IEnumerable<ValidationMessage.ValidationMessage> messages)
         {
             isSuccessful = IsSuccessful;
             messages = ValidationMessages;
         }
 
-        public static Result Create(IEnumerable<ValidationMessage> validationMessages) =>
+        public static Result Create(IEnumerable<ValidationMessage.ValidationMessage> validationMessages) =>
             new(validationMessages);
 
-        public static Result<TValue> Create<TValue>(TValue value, IEnumerable<ValidationMessage> validationMessages) =>
+        public static Result<TValue> Create<TValue>(TValue value, IEnumerable<ValidationMessage.ValidationMessage> validationMessages) =>
             Result<TValue>.Create(value, validationMessages);
 
 
-        public static Result Ok() => new(Enumerable.Empty<ValidationMessage>());
+        public static Result Ok() => new(Enumerable.Empty<ValidationMessage.ValidationMessage>());
 
         public static Result<TValue> Ok<TValue>(TValue value) => Result<TValue>.Create(value);
 
         public static Result Error(TranslationKeyDefinition translationKey, object[] parameters)
-            => new(ValidationMessage.CreateError(translationKey, parameters));
+            => new(ValidationMessage.ValidationMessage.CreateError(translationKey, parameters));
 
         public static Result Error(TranslationKeyDefinition translationKey, object parameter)
-            => new(ValidationMessage.CreateError(translationKey, parameter));
+            => new(ValidationMessage.ValidationMessage.CreateError(translationKey, parameter));
 
         public static Result Error(TranslationKeyDefinition translationKey)
-            => new(ValidationMessage.CreateError(translationKey));
+            => new(ValidationMessage.ValidationMessage.CreateError(translationKey));
 
         public static Result Error(Result result)
             => new Result(result.ValidationMessages);
 
-        public static Result Error(IEnumerable<ValidationMessage> validationMessages)
+        public static Result Error(IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
             => new Result(validationMessages);
 
-        public static Result Error(ValidationMessage validationMessage)
+        public static Result Error(ValidationMessage.ValidationMessage validationMessage)
             => new Result([validationMessage]);
 
         public static Result<T> Try<T>(Func<T> operation, TranslationKeyDefinition errorKey, params object[] parameters)
