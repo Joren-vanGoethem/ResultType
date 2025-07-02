@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE instance-profile
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
+
+<instance-profile id="j"
+                  name="Jv.utils.Result" start-page="README.md">
+
+    <toc-element topic="README.md">
+        <toc-element topic="Result-Types.md"/>
+        <toc-element topic="Validation-System.md"/>
+        <toc-element topic="Memoization.md"/>
+    </toc-element>
+</instance-profile>
