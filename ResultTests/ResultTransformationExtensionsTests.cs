@@ -50,7 +50,7 @@ public class ResultTransformationExtensionsTests
     public void Map_WithFailedResult_PreservesErrors()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Original error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Original error");
         var failedResult = Result.Create<int>(default, new[] { errorMessage });
 
         // Act
@@ -131,7 +131,7 @@ public class ResultTransformationExtensionsTests
     public void Bind_WithFailedResult_DoesNotExecuteBinder()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Original error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Original error");
         var failedResult = Result.Create<int>(default, new[] { errorMessage });
         var binderExecuted = false;
 
@@ -230,7 +230,7 @@ public class ResultTransformationExtensionsTests
     public void Match_WithFailedResult_CallsOnFailure()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Test error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Test error");
         var failedResult = Result.Create<string>(default, new[] { errorMessage });
         var onSuccessCalled = false;
         var onFailureCalled = false;
@@ -281,7 +281,7 @@ public class ResultTransformationExtensionsTests
     public void Match_WhenOnFailureThrows_PropagatesException()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Test error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Test error");
         var failedResult = Result.Create<string>(default, new[] { errorMessage });
 
         // Act & Assert

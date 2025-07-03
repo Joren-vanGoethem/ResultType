@@ -67,12 +67,12 @@ public class ValidationMessageTests
     }
 
     /// <summary>
-    /// Validates that ValidationMessage.CreateError successfully creates a ValidationMessage when 
+    /// Validates that ValidationMessage.Create successfully creates a ValidationMessage when 
     /// provided with valid parameters that match the key definition.
     /// This test ensures the error message creation process works correctly and stores parameters properly.
     /// </summary>
     [Fact]
-    public void CreateError_WithValidParameters_CreatesValidationMessage()
+    public void Create_WithValidParameters_CreatesValidationMessage()
     {
         // Arrange
         var keyDefinition = TranslationKeyDefinition.Create("error.key", "Error Key")
@@ -80,7 +80,7 @@ public class ValidationMessageTests
             .WithIntParameter("count");
 
         // Act
-        var message = ValidationMessage.CreateError(keyDefinition, "John", 5);
+        var message = ValidationMessage.Create(keyDefinition, "John", 5);
 
         // Assert
         Assert.Equal("Error Key", message.TranslationKey);
@@ -90,12 +90,12 @@ public class ValidationMessageTests
     }
 
     /// <summary>
-    /// Validates that ValidationMessage.CreateError throws an ArgumentException when provided with 
+    /// Validates that ValidationMessage.Create throws an ArgumentException when provided with 
     /// parameters that don't match the expected types in the key definition.
     /// This test ensures parameter validation is enforced during error message creation to prevent runtime errors.
     /// </summary>
     [Fact]
-    public void CreateError_WithInvalidParameters_ThrowsArgumentException()
+    public void Create_WithInvalidParameters_ThrowsArgumentException()
     {
         // Arrange
         var keyDefinition = TranslationKeyDefinition.Create("error.key", "Error Key")
@@ -104,7 +104,7 @@ public class ValidationMessageTests
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() =>
-            ValidationMessage.CreateError(keyDefinition, 5, "John")); // Swapped types
+            ValidationMessage.Create(keyDefinition, 5, "John")); // Swapped types
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public class ValidationMessageTests
         var keyDefinition = TranslationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("name")
             .WithIntParameter("count");
-        var message = ValidationMessage.CreateError(keyDefinition, "John", 5);
+        var message = ValidationMessage.Create(keyDefinition, "John", 5);
 
         // Act
         var errorMessage = message.MapToErrorMessage();

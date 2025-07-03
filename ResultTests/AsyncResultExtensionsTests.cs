@@ -54,7 +54,7 @@ public class AsyncResultExtensionsTests
     public async Task MapAsync_WithFailedResult_PreservesErrors()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Original error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Original error");
         var failedResult = Task.FromResult(Result.Create<int>(default, new[] { errorMessage }));
 
         // Act
@@ -151,7 +151,7 @@ public class AsyncResultExtensionsTests
     public async Task BindAsync_WithFailedResult_DoesNotExecuteBinder()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Original error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Original error");
         var failedResult = Task.FromResult(Result.Create<int>(default, new[] { errorMessage }));
         var binderExecuted = false;
 
@@ -261,7 +261,7 @@ public class AsyncResultExtensionsTests
     public async Task MatchAsync_TaskResultWithAsyncHandlers_FailedResult_CallsOnFailure()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Test error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Test error");
         var failedResult = Task.FromResult(Result.Create<string>(default, new[] { errorMessage }));
         var onSuccessCalled = false;
         var onFailureCalled = false;
@@ -328,7 +328,7 @@ public class AsyncResultExtensionsTests
     public async Task MatchAsync_TaskResultWithSyncHandlers_FailedResult_CallsOnFailure()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Test error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Test error");
         var failedResult = Task.FromResult(Result.Create<int>(default, new[] { errorMessage }));
         var onSuccessCalled = false;
         var onFailureCalled = false;
@@ -395,7 +395,7 @@ public class AsyncResultExtensionsTests
     public async Task MatchAsync_ResultWithAsyncHandlers_FailedResult_CallsOnFailure()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Test error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Test error");
         var failedResult = Result.Create<string>(default, new[] { errorMessage });
         var onSuccessCalled = false;
         var onFailureCalled = false;
@@ -464,7 +464,7 @@ public class AsyncResultExtensionsTests
     public async Task MatchAsync_TaskResult_FailedResult_CallsOnFailure()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Test error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Test error");
         var failedResult = Task.FromResult(Result.Create(new[] { errorMessage }));
         var onSuccessCalled = false;
         var onFailureCalled = false;
@@ -525,7 +525,7 @@ public class AsyncResultExtensionsTests
     public async Task MatchAsync_WhenOnFailureThrows_PropagatesException()
     {
         // Arrange
-        var errorMessage = ValidationMessage.CreateError(_errorKey, "Test error");
+        var errorMessage = ValidationMessage.Create(_errorKey, "Test error");
         var failedResult = Task.FromResult(Result.Create<string>(default, new[] { errorMessage }));
 
         // Act & Assert
@@ -619,7 +619,7 @@ public class AsyncResultExtensionsTests
                 }
                 else
                 {
-                    var errorMessage = ValidationMessage.CreateError(errorKey, "Value too small");
+                    var errorMessage = ValidationMessage.Create(errorKey, "Value too small");
                     return Result.Create<int>(default, new[] { errorMessage });
                 }
             })

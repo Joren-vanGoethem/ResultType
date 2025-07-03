@@ -20,7 +20,7 @@ namespace JV.Utils.ValidationMessage
             Parameters = keyDefinition.FormatParameters(parameters);
         }
 
-        public static ValidationMessage CreateError(TranslationKeyDefinition keyDefinition, params object[] parameters)
+        public static ValidationMessage Create(TranslationKeyDefinition keyDefinition, params object[] parameters)
         {
             return new ValidationMessage(keyDefinition, parameters);
         }

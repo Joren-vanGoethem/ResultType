@@ -33,7 +33,7 @@ public class ResultTypeTests
         // Arrange
         var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
-        var message = ValidationMessage.CreateError(errorKey, "Some error");
+        var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
 
         // Act
@@ -53,7 +53,7 @@ public class ResultTypeTests
         // Arrange
         var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
-        var message = ValidationMessage.CreateError(errorKey, "Some error");
+        var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
 
         // Act
@@ -74,7 +74,7 @@ public class ResultTypeTests
         // Arrange
         var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
-        var message = ValidationMessage.CreateError(errorKey, "Some error");
+        var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
 
         // Act
@@ -95,7 +95,7 @@ public class ResultTypeTests
         // Arrange
         var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
-        var message = ValidationMessage.CreateError(errorKey, "Some error");
+        var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
 
         // Act
@@ -135,8 +135,8 @@ public class ResultTypeTests
             .WithStringParameter("message");
 
         var result1 = Result.Ok("test value").Merge(
-            Result.Create(new[] { ValidationMessage.CreateError(errorKey1, "Error 1") }));
-        var result2 = Result.Create(new[] { ValidationMessage.CreateError(errorKey2, "Error 2") });
+            Result.Create(new[] { ValidationMessage.Create(errorKey1, "Error 1") }));
+        var result2 = Result.Create(new[] { ValidationMessage.Create(errorKey2, "Error 2") });
 
         // Act
         var mergedResult = result1.Merge(result2);

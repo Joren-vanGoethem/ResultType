@@ -100,13 +100,13 @@ namespace JV.Utils
         public static Result<TValue> Ok<TValue>(TValue value) => Result<TValue>.Create(value);
 
         public static Result Error(TranslationKeyDefinition translationKey, object[] parameters)
-            => new(ValidationMessage.ValidationMessage.CreateError(translationKey, parameters));
+            => new(ValidationMessage.ValidationMessage.Create(translationKey, parameters));
 
         public static Result Error(TranslationKeyDefinition translationKey, object parameter)
-            => new(ValidationMessage.ValidationMessage.CreateError(translationKey, parameter));
+            => new(ValidationMessage.ValidationMessage.Create(translationKey, parameter));
 
         public static Result Error(TranslationKeyDefinition translationKey)
-            => new(ValidationMessage.ValidationMessage.CreateError(translationKey));
+            => new(ValidationMessage.ValidationMessage.Create(translationKey));
 
         public static Result Error(Result result)
             => new Result(result.ValidationMessages);

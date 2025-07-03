@@ -46,19 +46,19 @@ public class UserService
         // Validate username
         if (string.IsNullOrWhiteSpace(user.Username) || user.Username.Length < 3)
         {
-            validationMessages.Add(ValidationMessage.CreateError(UsernameInvalidKey, user.Username ?? string.Empty, 3));
+            validationMessages.Add(ValidationMessage.Create(UsernameInvalidKey, user.Username ?? string.Empty, 3));
         }
 
         // Validate email
         if (string.IsNullOrWhiteSpace(user.Email) || !IsValidEmail(user.Email))
         {
-            validationMessages.Add(ValidationMessage.CreateError(EmailInvalidKey, user.Email ?? string.Empty));
+            validationMessages.Add(ValidationMessage.Create(EmailInvalidKey, user.Email ?? string.Empty));
         }
 
         // Validate age
         if (user.Age < 18)
         {
-            validationMessages.Add(ValidationMessage.CreateError(AgeInvalidKey, user.Age, 18));
+            validationMessages.Add(ValidationMessage.Create(AgeInvalidKey, user.Age, 18));
         }
 
         // Return result

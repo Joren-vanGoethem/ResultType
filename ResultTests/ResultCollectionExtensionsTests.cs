@@ -235,10 +235,10 @@ namespace ResultTests
             var errors = new List<ValidationMessage>();
 
             if (request.Age < 18)
-                errors.Add(ValidationMessage.CreateError(ValidationErrorKey, request.Age));
+                errors.Add(ValidationMessage.Create(ValidationErrorKey, request.Age));
 
             if (!request.Email.Contains("@") || request.Email.Contains("invalid"))
-                errors.Add(ValidationMessage.CreateError(ProcessingErrorKey, request.Email));
+                errors.Add(ValidationMessage.Create(ProcessingErrorKey, request.Email));
 
             return errors.Any()
                 ? Result.Create<string>(null, errors)
