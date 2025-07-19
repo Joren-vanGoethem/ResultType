@@ -6,11 +6,11 @@ namespace ResultTests
 {
     public class ResultCollectionExtensionsTests
     {
-        private static readonly TranslationKeyDefinition ProcessingErrorKey = TranslationKeyDefinition
+        private static readonly ValidationKeyDefinition ProcessingErrorKey = ValidationKeyDefinition
             .Create("processing.error")
             .WithStringParameter("item");
 
-        private static readonly TranslationKeyDefinition ValidationErrorKey = TranslationKeyDefinition
+        private static readonly ValidationKeyDefinition ValidationErrorKey = ValidationKeyDefinition
             .Create("validation.error")
             .WithIntParameter("value");
 

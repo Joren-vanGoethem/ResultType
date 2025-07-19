@@ -31,7 +31,7 @@ public class ResultTypeTests
     public void IsSuccessful_WithErrors_ReturnsFalse()
     {
         // Arrange
-        var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
+        var errorKey = ValidationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
         var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
@@ -51,7 +51,7 @@ public class ResultTypeTests
     public void IsFailure_WithErrors_ReturnsTrue()
     {
         // Arrange
-        var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
+        var errorKey = ValidationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
         var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
@@ -72,7 +72,7 @@ public class ResultTypeTests
     public void ToString_ReturnsFormattedMessage()
     {
         // Arrange
-        var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
+        var errorKey = ValidationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
         var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
@@ -93,7 +93,7 @@ public class ResultTypeTests
     public void ToStringWithParameters_ReturnsFormattedMessageWithParameters()
     {
         // Arrange
-        var errorKey = TranslationKeyDefinition.Create("error.key", "Error Key")
+        var errorKey = ValidationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("message");
         var message = ValidationMessage.Create(errorKey, "Some error");
         var result = Result.Create(new[] { message });
@@ -129,9 +129,9 @@ public class ResultTypeTests
     public void ResultOfT_Merge_CombinesValidationMessages()
     {
         // Arrange
-        var errorKey1 = TranslationKeyDefinition.Create("error.key1", "Error Key 1")
+        var errorKey1 = ValidationKeyDefinition.Create("error.key1", "Error Key 1")
             .WithStringParameter("message");
-        var errorKey2 = TranslationKeyDefinition.Create("error.key2", "Error Key 2")
+        var errorKey2 = ValidationKeyDefinition.Create("error.key2", "Error Key 2")
             .WithStringParameter("message");
 
         var result1 = Result.Ok("test value").Merge(

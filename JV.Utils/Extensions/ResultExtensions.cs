@@ -111,7 +111,7 @@ namespace JV.Utils.Extensions
 
         public static Result<T> Ensure<T>(this Result<T> result,
             Func<T, bool> predicate,
-            TranslationKeyDefinition errorKey,
+            ValidationKeyDefinition errorKey,
             params object[] parameters)
         {
             if (result.IsFailure) return result;
@@ -123,7 +123,7 @@ namespace JV.Utils.Extensions
 
         public static Result<T> Filter<T>(this Result<T> result,
             Func<T, bool> predicate,
-            TranslationKeyDefinition errorKey,
+            ValidationKeyDefinition errorKey,
             params object[] parameters)
         {
             return result.Ensure(predicate, errorKey, parameters);

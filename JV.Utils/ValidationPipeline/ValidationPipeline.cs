@@ -22,6 +22,6 @@ public class ValidationPipeline<T>
 
         return mergedResult.IsSuccessful
             ? Result.Ok(value)
-            : Result.Create<T>(default, mergedResult.ValidationMessages);
+            : Result.Error(mergedResult.ValidationMessages);
     }
 }

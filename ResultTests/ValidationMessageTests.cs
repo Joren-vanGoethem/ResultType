@@ -15,7 +15,7 @@ public class ValidationMessageTests
     public void TranslationKeyDefinition_ValidateParameters_WithCorrectParameters_ReturnsTrue()
     {
         // Arrange
-        var keyDefinition = TranslationKeyDefinition.Create("test.key", "Test Key")
+        var keyDefinition = ValidationKeyDefinition.Create("test.key", "Test Key")
             .WithStringParameter("name")
             .WithIntParameter("age");
 
@@ -35,7 +35,7 @@ public class ValidationMessageTests
     public void TranslationKeyDefinition_ValidateParameters_WithIncorrectParameterTypes_ReturnsFalse()
     {
         // Arrange
-        var keyDefinition = TranslationKeyDefinition.Create("test.key", "Test Key")
+        var keyDefinition = ValidationKeyDefinition.Create("test.key", "Test Key")
             .WithStringParameter("name")
             .WithIntParameter("age");
 
@@ -55,7 +55,7 @@ public class ValidationMessageTests
     public void TranslationKeyDefinition_ValidateParameters_WithIncorrectParameterCount_ReturnsFalse()
     {
         // Arrange
-        var keyDefinition = TranslationKeyDefinition.Create("test.key", "Test Key")
+        var keyDefinition = ValidationKeyDefinition.Create("test.key", "Test Key")
             .WithStringParameter("name")
             .WithIntParameter("age");
 
@@ -75,7 +75,7 @@ public class ValidationMessageTests
     public void Create_WithValidParameters_CreatesValidationMessage()
     {
         // Arrange
-        var keyDefinition = TranslationKeyDefinition.Create("error.key", "Error Key")
+        var keyDefinition = ValidationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("name")
             .WithIntParameter("count");
 
@@ -98,7 +98,7 @@ public class ValidationMessageTests
     public void Create_WithInvalidParameters_ThrowsArgumentException()
     {
         // Arrange
-        var keyDefinition = TranslationKeyDefinition.Create("error.key", "Error Key")
+        var keyDefinition = ValidationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("name")
             .WithIntParameter("count");
 
@@ -116,7 +116,7 @@ public class ValidationMessageTests
     public void MapToErrorMessage_ReturnsFormattedMessage()
     {
         // Arrange
-        var keyDefinition = TranslationKeyDefinition.Create("error.key", "Error Key")
+        var keyDefinition = ValidationKeyDefinition.Create("error.key", "Error Key")
             .WithStringParameter("name")
             .WithIntParameter("count");
         var message = ValidationMessage.Create(keyDefinition, "John", 5);

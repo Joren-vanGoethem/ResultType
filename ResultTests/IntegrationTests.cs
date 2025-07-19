@@ -24,17 +24,17 @@ public class User
 public class UserService
 {
     // Define translation keys as constants for reuse
-    private static readonly TranslationKeyDefinition UsernameInvalidKey = TranslationKeyDefinition
+    private static readonly ValidationKeyDefinition UsernameInvalidKey = ValidationKeyDefinition
         .Create("user.username.invalid")
         .WithStringParameter("username")
         .WithIntParameter("minLength");
 
-    private static readonly TranslationKeyDefinition EmailInvalidKey = TranslationKeyDefinition
+    private static readonly ValidationKeyDefinition EmailInvalidKey = ValidationKeyDefinition
         .Create("user.email.invalid")
         .WithStringParameter(
             "email"); // when using emailParameter it HAS to be a valid email, here it might be something wrong
 
-    private static readonly TranslationKeyDefinition AgeInvalidKey = TranslationKeyDefinition
+    private static readonly ValidationKeyDefinition AgeInvalidKey = ValidationKeyDefinition
         .Create("user.age.invalid")
         .WithIntParameter("age")
         .WithIntParameter("minAge");

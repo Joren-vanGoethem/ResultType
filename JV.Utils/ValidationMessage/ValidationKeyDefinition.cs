@@ -4,39 +4,39 @@ using System.Linq;
 
 namespace JV.Utils.ValidationMessage
 {
-    public class TranslationKeyDefinition
+    public class ValidationKeyDefinition
     {
         public string Key { get; }
         public string TranslationKey { get; }
-        public IReadOnlyList<TranslationParameter> Parameters { get; }
+        public IReadOnlyList<ValidationParameter> Parameters { get; }
 
-        private TranslationKeyDefinition(string key, string translationKey,
-            IEnumerable<TranslationParameter> parameters)
+        private ValidationKeyDefinition(string key, string translationKey,
+            IEnumerable<ValidationParameter> parameters)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
             TranslationKey = translationKey ?? throw new ArgumentNullException(nameof(translationKey));
-            Parameters = parameters?.ToList().AsReadOnly() ?? new List<TranslationParameter>().AsReadOnly();
+            Parameters = parameters?.ToList().AsReadOnly() ?? new List<ValidationParameter>().AsReadOnly();
         }
 
-        public static TranslationKeyDefinition Create(string key, string translationKey)
+        public static ValidationKeyDefinition Create(string key, string translationKey)
         {
-            return new TranslationKeyDefinition(key, translationKey, new List<TranslationParameter>());
+            return new ValidationKeyDefinition(key, translationKey, new List<ValidationParameter>());
         }
 
-        public static TranslationKeyDefinition Create(string key) // usefull when key is also the translationKey
+        public static ValidationKeyDefinition Create(string key) // usefull when key is also the translationKey
         {
-            return new TranslationKeyDefinition(key, key, new List<TranslationParameter>());
+            return new ValidationKeyDefinition(key, key, new List<ValidationParameter>());
         }
 
-        public static TranslationKeyDefinition Create(string key, string translationKey,
-            params TranslationParameter[] parameters)
+        public static ValidationKeyDefinition Create(string key, string translationKey,
+            params ValidationParameter[] parameters)
         {
-            return new TranslationKeyDefinition(key, translationKey, parameters);
+            return new ValidationKeyDefinition(key, translationKey, parameters);
         }
 
-        public static TranslationKeyDefinition Create(string key, params TranslationParameter[] parameters)
+        public static ValidationKeyDefinition Create(string key, params ValidationParameter[] parameters)
         {
-            return new TranslationKeyDefinition(key, key, parameters);
+            return new ValidationKeyDefinition(key, key, parameters);
         }
 
         public bool ValidateParameters(object[] parameters)

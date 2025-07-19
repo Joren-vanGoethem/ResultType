@@ -3,7 +3,7 @@ using JV.Utils.ValidationMessage;
 
 namespace ResultTests;
 
-public class TranslationParameterTests
+public class ValidationParameterTests
 {
     /// <summary>
     /// Validates that a TranslationParameter configured for string type correctly accepts valid string values
@@ -14,7 +14,7 @@ public class TranslationParameterTests
     public void StringParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("name", ParameterType.String);
+        var parameter = new ValidationParameter("name", ParameterType.String);
 
         // Act & Assert
         Assert.True(parameter.ValidateValue("test"));
@@ -30,7 +30,7 @@ public class TranslationParameterTests
     public void IntegerParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("count", ParameterType.Integer);
+        var parameter = new ValidationParameter("count", ParameterType.Integer);
 
         // Act & Assert
         Assert.True(parameter.ValidateValue(123));
@@ -49,7 +49,7 @@ public class TranslationParameterTests
     public void DecimalParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("price", ParameterType.Decimal);
+        var parameter = new ValidationParameter("price", ParameterType.Decimal);
 
         // Act & Assert
         Assert.True(parameter.ValidateValue(123.45));
@@ -68,7 +68,7 @@ public class TranslationParameterTests
     public void DateTimeParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("date", ParameterType.DateTime);
+        var parameter = new ValidationParameter("date", ParameterType.DateTime);
         var dateTime = new DateTime(2025, 1, 1);
 
         // Act & Assert
@@ -86,7 +86,7 @@ public class TranslationParameterTests
     public void TimeOnlyParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("time", ParameterType.TimeOnly);
+        var parameter = new ValidationParameter("time", ParameterType.TimeOnly);
         var timeOnly = new TimeOnly(14, 30);
 
         // Act & Assert
@@ -104,7 +104,7 @@ public class TranslationParameterTests
     public void DateOnlyParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("date", ParameterType.DateOnly);
+        var parameter = new ValidationParameter("date", ParameterType.DateOnly);
         var dateOnly = new DateOnly(2025, 1, 1);
 
         // Act & Assert
@@ -122,7 +122,7 @@ public class TranslationParameterTests
     public void BooleanParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("active", ParameterType.Boolean);
+        var parameter = new ValidationParameter("active", ParameterType.Boolean);
 
         // Act & Assert
         Assert.True(parameter.ValidateValue(true));
@@ -141,7 +141,7 @@ public class TranslationParameterTests
     public void GuidParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("id", ParameterType.Guid);
+        var parameter = new ValidationParameter("id", ParameterType.Guid);
         var guid = Guid.NewGuid();
 
         // Act & Assert
@@ -159,7 +159,7 @@ public class TranslationParameterTests
     public void EnumParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("severity", ParameterType.Enum);
+        var parameter = new ValidationParameter("severity", ParameterType.Enum);
 
         // Act & Assert
 
@@ -175,7 +175,7 @@ public class TranslationParameterTests
     public void UriParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("url", ParameterType.Uri);
+        var parameter = new ValidationParameter("url", ParameterType.Uri);
         var uri = new Uri("https://example.com");
 
         // Act & Assert
@@ -193,7 +193,7 @@ public class TranslationParameterTests
     public void TimeSpanParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("duration", ParameterType.TimeSpan);
+        var parameter = new ValidationParameter("duration", ParameterType.TimeSpan);
         var timeSpan = TimeSpan.FromHours(2);
 
         // Act & Assert
@@ -211,7 +211,7 @@ public class TranslationParameterTests
     public void EmailParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("email", ParameterType.Email);
+        var parameter = new ValidationParameter("email", ParameterType.Email);
 
         // Act & Assert
         Assert.True(parameter.ValidateValue("test@example.com"));
@@ -227,7 +227,7 @@ public class TranslationParameterTests
     public void PhoneNumberParameter_ValidatesCorrectly()
     {
         // Arrange
-        var parameter = new TranslationParameter("phone", ParameterType.PhoneNumber);
+        var parameter = new ValidationParameter("phone", ParameterType.PhoneNumber);
 
         // Act & Assert
         Assert.True(parameter.ValidateValue("+1234567890"));
@@ -244,7 +244,7 @@ public class TranslationParameterTests
     public void FormatValue_WithValidValue_ReturnsFormattedString()
     {
         // Arrange
-        var parameter = new TranslationParameter("count", ParameterType.Integer);
+        var parameter = new ValidationParameter("count", ParameterType.Integer);
 
         // Act
         var formatted = parameter.FormatValue(123);
@@ -262,7 +262,7 @@ public class TranslationParameterTests
     public void FormatValue_WithInvalidValue_ThrowsArgumentException()
     {
         // Arrange
-        var parameter = new TranslationParameter("count", ParameterType.Integer);
+        var parameter = new ValidationParameter("count", ParameterType.Integer);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => parameter.FormatValue("not an integer"));

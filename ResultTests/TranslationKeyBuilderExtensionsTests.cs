@@ -15,7 +15,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithStringParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithStringParameter("name");
@@ -35,7 +35,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithIntParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithIntParameter("count");
@@ -55,7 +55,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithDecimalParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithDecimalParameter("price");
@@ -75,7 +75,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithDateTimeParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithDateTimeParameter("created");
@@ -95,7 +95,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithTimeOnlyParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithTimeOnlyParameter("startTime");
@@ -115,7 +115,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithDateOnlyParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithDateOnlyParameter("birthDate");
@@ -135,7 +135,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithBooleanParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithBooleanParameter("isActive");
@@ -155,7 +155,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithGuidParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithGuidParameter("id");
@@ -175,7 +175,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithEnumParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithEnumParameter("status");
@@ -195,7 +195,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithUriParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithUriParameter("website");
@@ -215,7 +215,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithTimeSpanParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithTimeSpanParameter("duration");
@@ -235,7 +235,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithEmailParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithEmailParameter("email");
@@ -255,7 +255,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void WithPhoneNumberParameter_AddsParameterCorrectly()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParam = baseKey.WithPhoneNumberParameter("phone");
@@ -276,7 +276,7 @@ public class TranslationKeyBuilderExtensionsTests
     public void ChainedExtensions_AddMultipleParameters()
     {
         // Arrange
-        var baseKey = TranslationKeyDefinition.Create("test.key", "Test Key");
+        var baseKey = ValidationKeyDefinition.Create("test.key", "Test Key");
 
         // Act
         var keyWithParams = baseKey

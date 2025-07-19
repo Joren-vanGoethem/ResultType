@@ -21,12 +21,12 @@ namespace JV.Utils.ValidationMessage
         PhoneNumber
     }
 
-    public class TranslationParameter
+    public class ValidationParameter
     {
         public string Name { get; }
         public ParameterType Type { get; }
 
-        public TranslationParameter(string name, ParameterType type)
+        public ValidationParameter(string name, ParameterType type)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Type = type;

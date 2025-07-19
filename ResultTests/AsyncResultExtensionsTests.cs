@@ -6,15 +6,15 @@ namespace ResultTests;
 
 public class AsyncResultExtensionsTests
 {
-    private readonly TranslationKeyDefinition _errorKey = TranslationKeyDefinition
+    private readonly ValidationKeyDefinition _errorKey = ValidationKeyDefinition
         .Create("error.test", "Test Error")
         .WithStringParameter("message");
 
-    private readonly TranslationKeyDefinition _errorNegativeKey = TranslationKeyDefinition
+    private readonly ValidationKeyDefinition _errorNegativeKey = ValidationKeyDefinition
         .Create("error.negative")
         .WithStringParameter("message");
 
-    private readonly TranslationKeyDefinition _errorTooSmallKey = TranslationKeyDefinition
+    private readonly ValidationKeyDefinition _errorTooSmallKey = ValidationKeyDefinition
         .Create("error.too.small")
         .WithStringParameter("message");
 
@@ -598,7 +598,7 @@ public class AsyncResultExtensionsTests
     {
         // Arrange
         var initialResult = Result.Ok(2);
-        var errorKey = TranslationKeyDefinition.Create("error.too.small", "Value too small")
+        var errorKey = ValidationKeyDefinition.Create("error.too.small", "Value too small")
             .WithStringParameter("message");
         var mapperCalled = false;
         var matchOnSuccessCalled = false;

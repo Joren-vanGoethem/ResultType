@@ -6,11 +6,11 @@ namespace ResultTests
 {
     public class ResultExtensionsTests
     {
-        private static readonly TranslationKeyDefinition TestErrorKey = TranslationKeyDefinition
+        private static readonly ValidationKeyDefinition TestErrorKey = ValidationKeyDefinition
             .Create("test.error")
             .WithStringParameter("message");
 
-        private static readonly TranslationKeyDefinition ValidationErrorKey = TranslationKeyDefinition
+        private static readonly ValidationKeyDefinition ValidationErrorKey = ValidationKeyDefinition
             .Create("validation.error")
             .WithIntParameter("value");
 

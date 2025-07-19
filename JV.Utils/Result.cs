@@ -57,7 +57,6 @@ namespace JV.Utils
 
         public static implicit operator Result<TValue>(TValue value) => Result.Ok(value);
         public static implicit operator Result<TValue>(ValidationMessage.ValidationMessage error) => Result.Error(error);
-
         public static implicit operator Result<TValue>(ValidationMessage.ValidationMessage[] errors) =>
             Result.Create<TValue>(default, errors);
     }
@@ -99,14 +98,14 @@ namespace JV.Utils
 
         public static Result<TValue> Ok<TValue>(TValue value) => Result<TValue>.Create(value);
 
-        public static Result Error(TranslationKeyDefinition translationKey, object[] parameters)
-            => new(ValidationMessage.ValidationMessage.Create(translationKey, parameters));
+        public static Result Error(ValidationKeyDefinition validationKey, object[] parameters)
+            => new(ValidationMessage.ValidationMessage.Create(validationKey, parameters));
 
-        public static Result Error(TranslationKeyDefinition translationKey, object parameter)
-            => new(ValidationMessage.ValidationMessage.Create(translationKey, parameter));
+        public static Result Error(ValidationKeyDefinition validationKey, object parameter)
+            => new(ValidationMessage.ValidationMessage.Create(validationKey, parameter));
 
-        public static Result Error(TranslationKeyDefinition translationKey)
-            => new(ValidationMessage.ValidationMessage.Create(translationKey));
+        public static Result Error(ValidationKeyDefinition validationKey)
+            => new(ValidationMessage.ValidationMessage.Create(validationKey));
 
         public static Result Error(Result result)
             => new Result(result.ValidationMessages);
@@ -117,7 +116,7 @@ namespace JV.Utils
         public static Result Error(ValidationMessage.ValidationMessage validationMessage)
             => new Result([validationMessage]);
 
-        public static Result<T> Try<T>(Func<T> operation, TranslationKeyDefinition errorKey, params object[] parameters)
+        public static Result<T> Try<T>(Func<T> operation, ValidationKeyDefinition errorKey, params object[] parameters)
         {
             try
             {
@@ -129,7 +128,7 @@ namespace JV.Utils
             }
         }
 
-        public static async Task<Result<T>> TryAsync<T>(Func<Task<T>> operation, TranslationKeyDefinition errorKey,
+        public static async Task<Result<T>> TryAsync<T>(Func<Task<T>> operation, ValidationKeyDefinition errorKey,
             params object[] parameters)
         {
             try
@@ -141,5 +140,7 @@ namespace JV.Utils
                 return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
             }
         }
+        
+        public static implicit operator Result(ValidationMessage.ValidationMessage error) => Error(error);
     }
 }
