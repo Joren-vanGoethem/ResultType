@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace JV.Utils.Extensions;
+namespace JV.ResultUtilities.Extensions;
 
 public static class ResultCollectionExtensions
 {

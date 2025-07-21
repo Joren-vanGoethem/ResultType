@@ -2,7 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace JV.Utils.Memoization;
+namespace JV.ResultUtilities.Memoization;
 
 /// <summary>
 /// Represents a memoized function that caches results based on input parameters.

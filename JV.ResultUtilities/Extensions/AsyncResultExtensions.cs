@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace JV.Utils.Extensions;
+namespace JV.ResultUtilities.Extensions;
 
 public static class AsyncResultExtensions
 {

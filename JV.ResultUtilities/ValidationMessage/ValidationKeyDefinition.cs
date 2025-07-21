@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace JV.Utils.ValidationMessage
+namespace JV.ResultUtilities.ValidationMessage
 {
     public class ValidationKeyDefinition
     {

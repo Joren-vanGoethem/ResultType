@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using JV.Utils.ValidationMessage;
+using JV.ResultUtilities.ValidationMessage;
 
-namespace JV.Utils.Extensions
+namespace JV.ResultUtilities.Extensions
 {
     public static class TranslationKeyBuilderExtensions
     {

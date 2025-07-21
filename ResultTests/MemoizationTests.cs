@@ -1,11 +1,11 @@
-using JV.Utils;
-using JV.Utils.Memoization;
-using JV.Utils.Memoization.Extensions;
+using JV.ResultUtilities;
+using JV.ResultUtilities.Memoization;
+using JV.ResultUtilities.Memoization.Extensions;
 
 namespace ResultTests;
 
 /// <summary>
-/// Tests for the memoization functionality in JV.Utils.
+/// Tests for the memoization functionality in JV.ResultUtilities.
 /// These tests demonstrate how memoization can be used to cache expensive operations
 /// and improve performance by avoiding redundant calculations.
 /// </summary>

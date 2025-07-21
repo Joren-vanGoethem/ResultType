@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace JV.Utils.Extensions
+namespace JV.ResultUtilities.Extensions
 {
     public static class ResultTransformationExtensions
     {

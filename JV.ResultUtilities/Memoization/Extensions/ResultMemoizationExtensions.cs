@@ -1,6 +1,6 @@
 using System;
 
-namespace JV.Utils.Memoization.Extensions;
+namespace JV.ResultUtilities.Memoization.Extensions;
 
 /// <summary>
 /// Extension methods that integrate memoization with the Result type system.

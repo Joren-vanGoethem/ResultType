@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\JV.Utils\JV.Utils.csproj" />
+      <ProjectReference Include="..\JV.ResultUtilities\JV.ResultUtilities.csproj" />
     </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace JV.Utils.Memoization.Extensions;
+namespace JV.ResultUtilities.Memoization.Extensions;
 
 /// <summary>
 /// Provides extension methods for memoization (caching) of function results.

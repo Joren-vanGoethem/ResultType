@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace JV.Utils.ValidationMessage
+namespace JV.ResultUtilities.ValidationMessage
 {
   public class ValidationMessage
   {

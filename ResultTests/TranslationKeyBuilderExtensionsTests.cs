@@ -1,6 +1,6 @@
-using JV.Utils;
-using JV.Utils.Extensions;
-using JV.Utils.ValidationMessage;
+using JV.ResultUtilities;
+using JV.ResultUtilities.Extensions;
+using JV.ResultUtilities.ValidationMessage;
 
 namespace ResultTests;
 
@@ -21,7 +21,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithStringParameter("name");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("name", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.String, keyWithParam.Parameters[0].Type);
     }
@@ -41,7 +41,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithIntParameter("count");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("count", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.Integer, keyWithParam.Parameters[0].Type);
     }
@@ -61,7 +61,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithDecimalParameter("price");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("price", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.Decimal, keyWithParam.Parameters[0].Type);
     }
@@ -81,7 +81,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithDateTimeParameter("created");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("created", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.DateTime, keyWithParam.Parameters[0].Type);
     }
@@ -101,7 +101,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithTimeOnlyParameter("startTime");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("startTime", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.TimeOnly, keyWithParam.Parameters[0].Type);
     }
@@ -121,7 +121,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithDateOnlyParameter("birthDate");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("birthDate", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.DateOnly, keyWithParam.Parameters[0].Type);
     }
@@ -141,7 +141,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithBooleanParameter("isActive");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("isActive", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.Boolean, keyWithParam.Parameters[0].Type);
     }
@@ -161,7 +161,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithGuidParameter("id");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("id", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.Guid, keyWithParam.Parameters[0].Type);
     }
@@ -181,7 +181,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithEnumParameter("status");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("status", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.Enum, keyWithParam.Parameters[0].Type);
     }
@@ -201,7 +201,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithUriParameter("website");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("website", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.Uri, keyWithParam.Parameters[0].Type);
     }
@@ -221,7 +221,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithTimeSpanParameter("duration");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("duration", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.TimeSpan, keyWithParam.Parameters[0].Type);
     }
@@ -241,7 +241,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithEmailParameter("email");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("email", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.Email, keyWithParam.Parameters[0].Type);
     }
@@ -261,7 +261,7 @@ public class TranslationKeyBuilderExtensionsTests
         var keyWithParam = baseKey.WithPhoneNumberParameter("phone");
 
         // Assert
-        Assert.Equal(1, keyWithParam.Parameters.Count);
+        Assert.Single(keyWithParam.Parameters);
         Assert.Equal("phone", keyWithParam.Parameters[0].Name);
         Assert.Equal(ParameterType.PhoneNumber, keyWithParam.Parameters[0].Type);
     }

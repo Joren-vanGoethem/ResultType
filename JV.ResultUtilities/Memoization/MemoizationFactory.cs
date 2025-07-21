@@ -1,6 +1,6 @@
 using System;
 
-namespace JV.Utils.Memoization;
+namespace JV.ResultUtilities.Memoization;
 
 /// <summary>
 /// Factory class for creating memoized functions with additional configuration options.

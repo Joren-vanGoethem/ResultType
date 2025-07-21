@@ -1,5 +1,5 @@
-using JV.Utils;
-using JV.Utils.ValidationMessage;
+using JV.ResultUtilities;
+using JV.ResultUtilities.ValidationMessage;
 
 namespace ResultTests;
 

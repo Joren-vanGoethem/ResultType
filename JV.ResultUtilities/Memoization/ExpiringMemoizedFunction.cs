@@ -3,7 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 
-namespace JV.Utils.Memoization;
+namespace JV.ResultUtilities.Memoization;
 
 /// <summary>
 /// A memoized function that supports cache expiration and size limits.

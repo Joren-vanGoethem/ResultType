@@ -2,12 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JV.Utils.ValidationMessage;
+using JV.ResultUtilities.ValidationMessage;
+using JV.ResultUtilities.Extensions;
 
-namespace JV.Utils
+namespace JV.ResultUtilities
 {
     public class Result<TValue> : ResultType
     {
+        
+        private static readonly ValidationKeyDefinition UsernameInvalidKey = ValidationKeyDefinition
+            .Create("user.username.invalid")
+            .WithStringParameter("username")
+            .WithIntParameter("minLength");
+
+        
         public TValue Value { get; }
 
         private Result(TValue value, IEnumerable<ValidationMessage.ValidationMessage> validationMessages)

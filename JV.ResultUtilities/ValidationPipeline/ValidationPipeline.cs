@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JV.Utils.Extensions;
+using JV.ResultUtilities.Extensions;
 
-namespace JV.Utils.ValidationPipeline;
+namespace JV.ResultUtilities.ValidationPipeline;
 
 public class ValidationPipeline<T>
 {
