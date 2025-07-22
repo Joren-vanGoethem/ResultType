@@ -17,7 +17,7 @@
         <PackageId>JV.ResultUtilities</PackageId>
         <Product>JV.ResultUtilities</Product>
         <LangVersion>13</LangVersion>
-        <Version>1.0.2</Version>
+        <Version>1.0.7</Version>
     </PropertyGroup>
 
     <ItemGroup>
