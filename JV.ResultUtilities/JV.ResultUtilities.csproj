@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <Title>JV.Utils.Result</Title>
+        <Title>JV.ResultUtilities</Title>
         <Authors>Joren vanGoethem</Authors>
         <Description>A basic Result type for propagating errors to the user.</Description>
         <RepositoryUrl>https://github.com/Joren-vanGoethem/ResultType</RepositoryUrl>
@@ -14,39 +14,14 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageId>JV.Utils.Result</PackageId>
-        <Product>JV.Utils.Result</Product>
+        <PackageId>JV.ResultUtilities</PackageId>
+        <Product>JV.ResultUtilities</Product>
         <LangVersion>13</LangVersion>
         <Version>1.0.2</Version>
-        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <IncludeBuildOutput>false</IncludeBuildOutput>
-        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     </PropertyGroup>
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
         <None Include="icon.png" Pack="true" PackagePath="\" />
     </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-    </ItemGroup>
-
-    <!-- Include the generator in the package -->
-    <ItemGroup>
-        <ProjectReference Include="..\JV.ResultUtilities.Generators\JV.ResultUtilities.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    </ItemGroup>
-
-    <!-- Ensure generated resource files are included -->
-    <ItemGroup>
-        <EmbeddedResource Include="**/*.resx" />
-    </ItemGroup>
-
-
 </Project>

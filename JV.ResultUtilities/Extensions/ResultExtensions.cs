@@ -2,12 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JV.ResultUtilities.Exceptions;
 using JV.ResultUtilities.ValidationMessage;
 
 namespace JV.ResultUtilities.Extensions
 {
     public static class ResultExtensions
     {
+        public static void ThrowIfFailure(this Result result)
+        {
+            if (result.IsFailure)
+                throw new ResultException(result);
+        }
+
+        public static void ThrowIfFailure<TValue>(this Result<TValue> result)
+        {
+            if (result.IsFailure)
+                throw new ResultException<TValue>(result);
+        }
+        
         /// <summary>
         /// Combines multiple results into one result
         /// </summary>
