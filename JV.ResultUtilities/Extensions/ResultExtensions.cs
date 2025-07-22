@@ -2,11 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JV.ResultUtilities.Exceptions;
+using JV.ResultUtilities.ValidationMessage;
 
-namespace JV.Utils
+namespace JV.ResultUtilities.Extensions
 {
     public static class ResultExtensions
     {
+        public static void ThrowIfFailure(this Result result)
+        {
+            if (result.IsFailure)
+                throw new ResultException(result);
+        }
+
+        public static void ThrowIfFailure<TValue>(this Result<TValue> result)
+        {
+            if (result.IsFailure)
+                throw new ResultException<TValue>(result);
+        }
+        
         /// <summary>
         /// Combines multiple results into one result
         /// </summary>
@@ -106,6 +120,40 @@ namespace JV.Utils
             }
 
             return mergedResult;
+        }
+
+        public static Result<T> Ensure<T>(this Result<T> result,
+            Func<T, bool> predicate,
+            ValidationKeyDefinition errorKey,
+            params object[] parameters)
+        {
+            if (result.IsFailure) return result;
+
+            return predicate(result.Value)
+                ? result
+                : Result.Error(errorKey, parameters);
+        }
+
+        public static Result<T> Filter<T>(this Result<T> result,
+            Func<T, bool> predicate,
+            ValidationKeyDefinition errorKey,
+            params object[] parameters)
+        {
+            return result.Ensure(predicate, errorKey, parameters);
+        }
+
+        public static Result<T> Do<T>(this Result<T> result, Action<T> action)
+        {
+            if (result.IsSuccessful)
+                action(result.Value);
+            return result;
+        }
+
+        public static async Task<Result<T>> DoAsync<T>(this Result<T> result, Func<T, Task> action)
+        {
+            if (result.IsSuccessful)
+                await action(result.Value);
+            return result;
         }
     }
 }
