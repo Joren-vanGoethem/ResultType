@@ -25,15 +25,18 @@ namespace JV.ResultUtilities.ValidationMessage
     {
         public string Name { get; }
         public ParameterType Type { get; }
+        public object? DefaultValue { get; }
 
-        public ValidationParameter(string name, ParameterType type)
+        public ValidationParameter(string name, ParameterType type, object? defaultValue = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Type = type;
+            DefaultValue = defaultValue;
         }
 
-        public bool ValidateValue(object value)
+        public bool ValidateValue(object? value = null)
         {
+            value ??= DefaultValue;
             if (value == null)
                 return false;
 

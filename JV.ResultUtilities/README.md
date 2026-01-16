@@ -3,7 +3,7 @@
 ## Overview
 
 This package provides a robust Result type implementation for handling success and failure states in your application.
-It includes type-safe validation messages using `TranslationKeyDefinition` to ensure that users provide the correct
+It includes type-safe validation messages using `ValidationKeyDefinition` to ensure that users provide the correct
 number and types of parameters when creating validation messages.
 
 Results are binary - they are either successful (contain no validation messages) or unsuccessful (contain one or more

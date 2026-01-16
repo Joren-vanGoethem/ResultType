@@ -109,27 +109,77 @@ private static Result ValidateUserProfile(User user)
 }
 ```
 
-## Translation Key Definitions
+## Validation Key Definitions
 
 ### Type-Safe Parameter Validation
 
-The validation system uses `TranslationKeyDefinition` to ensure type-safe validation messages:
+The validation system uses `ValidationKeyDefinition` to ensure type-safe validation messages. It supports several ways to provide parameters: positional, named (via anonymous objects or dictionaries), and default values.
 
 ```c#
-// Define keys with strongly-typed parameters
-private static readonly TranslationKeyDefinition UsernameInvalidKey = TranslationKeyDefinition
+// Define keys with strongly-typed parameters and optional default values
+private static readonly ValidationKeyDefinition UsernameInvalidKey = ValidationKeyDefinition
     .Create("user.username.invalid")
     .WithStringParameter("username")
-    .WithIntParameter("minLength");
+    .WithIntParameter("minLength", 3); // Default value of 3
 
-private static readonly TranslationKeyDefinition EmailInvalidKey = TranslationKeyDefinition
+private static readonly ValidationKeyDefinition EmailInvalidKey = ValidationKeyDefinition
     .Create("user.email.invalid")
     .WithStringParameter("email");
 
-private static readonly TranslationKeyDefinition AgeInvalidKey = TranslationKeyDefinition
+private static readonly ValidationKeyDefinition AgeInvalidKey = ValidationKeyDefinition
     .Create("user.age.invalid")
     .WithIntParameter("age")
-    .WithIntParameter("minAge");
+    .WithIntParameter("minAge", 18);
+```
+
+### Parameter Passing Options
+
+When creating a `ValidationMessage` or a `Result.Error`, you can pass parameters in multiple ways:
+
+#### 1. Positional Parameters (Array)
+Parameters are matched by their order in the definition.
+
+```c#
+// Matches "username" and "minLength"
+Result.Error(UsernameInvalidKey, new object[] { "jsmith", 5 });
+```
+
+#### 2. Named Parameters (Anonymous Object)
+Parameters are matched by property names. Order does not matter.
+
+```c#
+// Matches by name
+Result.Error(UsernameInvalidKey, new { minLength = 5, username = "jsmith" });
+```
+
+#### 3. Named Parameters (Dictionary)
+Useful when parameters are dynamically generated.
+
+```c#
+var params = new Dictionary<string, object> {
+    { "username", "jsmith" },
+    { "minLength", 5 }
+};
+Result.Error(UsernameInvalidKey, params);
+```
+
+#### 4. Default Values
+If a parameter has a default value, it can be omitted when using named parameters.
+
+```c#
+// minLength will use its default value (3)
+Result.Error(UsernameInvalidKey, new { username = "jsmith" });
+```
+
+#### 5. Single Value Passing
+If a definition has only one parameter (or only one parameter without a default value), you can pass the value directly without an array or object.
+
+```c#
+// Automatically maps to "email" parameter
+Result.Error(EmailInvalidKey, "invalid-email");
+
+// Automatically maps to "username" because "minLength" has a default
+Result.Error(UsernameInvalidKey, "jsmith");
 ```
 
 ### Parameter Type Support
@@ -137,11 +187,11 @@ private static readonly TranslationKeyDefinition AgeInvalidKey = TranslationKeyD
 The system supports various parameter types:
 
 ```c#
-var keyDefinition = TranslationKeyDefinition
+var keyDefinition = ValidationKeyDefinition
     .Create("validation.complex")
     .WithStringParameter("name")
     .WithIntParameter("count")
-    .WithBoolParameter("isActive")
+    .WithBooleanParameter("isActive")
     .WithDateTimeParameter("createdAt")
     // careful here, it will validate that it is a correct email, 
     // so use string if you expect the email to be wrongly formed
@@ -252,17 +302,17 @@ public static class UserValidators
 }
 ```
 
-### 2. Define Translation Keys Consistently
+### 2. Define Validation Keys Consistently
 
-Use a consistent naming convention for translation keys:
+Use a consistent naming convention for validation keys:
 
 ```c#
 // Domain.Entity.Property.ValidationRule
-private static readonly TranslationKeyDefinition UsernameRequiredKey =
-    TranslationKeyDefinition.Create("user.username.required");
+private static readonly ValidationKeyDefinition UsernameRequiredKey =
+    ValidationKeyDefinition.Create("user.username.required");
 
-private static readonly TranslationKeyDefinition EmailFormatKey =
-    TranslationKeyDefinition.Create("user.email.format");
+private static readonly ValidationKeyDefinition EmailFormatKey =
+    ValidationKeyDefinition.Create("user.email.format");
 ```
 
 ### 3. Fail Fast vs. Collect All

@@ -25,6 +25,7 @@ public class ValidationMessageTests
         // Assert
         Assert.True(isValid);
     }
+    
 
     /// <summary>
     /// Validates that TranslationKeyDefinition.ValidateParameters returns false when provided with 
