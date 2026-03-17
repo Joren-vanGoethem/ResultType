@@ -1,0 +1,96 @@
+### Variables
+@host = http://localhost:5000
+
+###########################################################
+# English (en)
+###########################################################
+
+### Create User - Valid request (EN)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com"
+}
+
+### Create User - Empty name (EN)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "name": "",
+  "email": "john.doe@example.com"
+}
+
+### Create User - Invalid email (EN)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "name": "John Doe",
+  "email": "not-an-email"
+}
+
+### Create User - Missing fields (EN)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: en
+
+{
+}
+
+### Create User - Null body (EN)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: en
+
+###########################################################
+# Dutch (nl)
+###########################################################
+
+### Create User - Valid request (NL)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: nl
+
+{
+  "name": "Jan Jansen",
+  "email": "jan.jansen@example.com"
+}
+
+### Create User - Empty name (NL)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: nl
+
+{
+  "name": "",
+  "email": "jan.jansen@example.com"
+}
+
+### Create User - Invalid email (NL)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: nl
+
+{
+  "name": "Jan Jansen",
+  "email": "geen-email"
+}
+
+### Create User - Missing fields (NL)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: nl
+
+{
+}
+
+### Create User - Null body (NL)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: nl

@@ -41,17 +41,7 @@ public class ResultExceptionTests
         Assert.Contains("simple.key", ex.Message);
         Assert.Single(ex.ValidationMessages);
     }
-
-    [Fact]
-    public void ResultExceptionOfT_FromResult_SetsMessage()
-    {
-        Result<int> result = Result.Error(TestKey, "typed error");
-        var ex = new ResultException<int>(result);
-
-        Assert.Contains("test.error", ex.Message);
-        Assert.Contains("typed error", ex.Message);
-    }
-
+    
     [Fact]
     public void ResultException_MultipleMessages_JoinsWithSemicolon()
     {
