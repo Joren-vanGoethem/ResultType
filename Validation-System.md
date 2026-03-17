@@ -12,8 +12,8 @@ all validation messages in a single operation.
 
 The `ValidationPipeline<T>` class is the main component that orchestrates the validation process. It allows you to:
 
-- Add multiple validation rules
-- Execute all rules against an object
+- Add multiple sync and async validation rules
+- Execute all rules against an object (or stop on first failure with `ShortCircuit`)
 - Collect and merge validation results
 - Return a comprehensive validation result
 
@@ -130,6 +130,11 @@ private static readonly ValidationKeyDefinition AgeInvalidKey = ValidationKeyDef
     .Create("user.age.invalid")
     .WithIntParameter("age")
     .WithIntParameter("minAge", 18);
+
+// Optionally associate a field name for mapping errors to form fields
+private static readonly ValidationKeyDefinition NameRequiredKey = ValidationKeyDefinition
+    .Create("user.name.required")
+    .WithFieldName("name");
 ```
 
 ### Parameter Passing Options
@@ -206,23 +211,25 @@ var keyDefinition = ValidationKeyDefinition
 Critical validation failures that prevent processing:
 
 ```c#
-ValidationMessage.CreateError(UsernameInvalidKey, user.Username, 3);
+ValidationMessage.Create(UsernameInvalidKey, user.Username, 3);
 ```
 
-### Warning Messages
+### Lenient Creation
 
-Non-critical issues that don't prevent processing:
+When you need to create a message without parameter type validation (e.g., for dynamic parameters or bridging with external systems), use `CreateLenient`. Parameters are converted to strings via `ToString()`:
 
 ```c#
-ValidationMessage.CreateWarning(PasswordWeakKey, user.Username);
+var message = ValidationMessage.CreateLenient(UsernameInvalidKey, "value1", 42, someObject);
 ```
 
-### Information Messages
+### RawParameters
 
-Informational messages for user feedback:
+`ValidationMessage` exposes a `RawParameters` property that preserves the original typed parameter values before string formatting. This is useful when you need to programmatically inspect parameter values:
 
 ```c#
-ValidationMessage.CreateInfo(AccountCreatedKey, user.Username);
+var message = ValidationMessage.Create(AgeInvalidKey, 15, 18);
+// message.Parameters     -> ["15", "18"] (formatted strings)
+// message.RawParameters  -> [15, 18]     (original typed values)
 ```
 
 ## Advanced Pipeline Patterns
@@ -261,30 +268,35 @@ public static class UserValidationRules
 
 ### Async Validation Rules
 
-While the current pipeline is synchronous, you can create async versions:
+`ValidationPipeline<T>` supports both sync and async rules natively. Use `AddRule` with a `Func<T, Task<Result>>` for async rules, and `ValidateAsync()` to execute them:
 
 ```c#
-public class AsyncValidationPipeline<T>
-{
-    private readonly List<Func<T, Task<Result>>> _validators = new();
-
-    public AsyncValidationPipeline<T> AddRule(Func<T, Task<Result>> validator)
+var pipeline = new ValidationPipeline<User>()
+    .AddRule(user => ValidateUsername(user))          // sync rule
+    .AddRule(async user =>                            // async rule
     {
-        _validators.Add(validator);
-        return this;
-    }
+        var exists = await userRepository.ExistsAsync(user.Email);
+        return exists
+            ? Result.Error(EmailTakenKey, user.Email)
+            : Result.Ok();
+    });
 
-    public async Task<Result<T>> ValidateAsync(T value)
-    {
-        var tasks = _validators.Select(v => v(value));
-        var results = await Task.WhenAll(tasks);
-        var mergedResult = results.MergeResults();
+var result = await pipeline.ValidateAsync(user);
+```
 
-        return mergedResult.IsSuccessful
-            ? Result.Create(value)
-            : Result.Create<T>(mergedResult.ValidationMessages);
-    }
-}
+> **Note**: Calling `Validate()` (synchronous) throws `InvalidOperationException` if any async rules have been added. Use `ValidateAsync()` when async rules are present.
+
+### Short-Circuit Mode
+
+By default, the pipeline collects all validation errors. Set `ShortCircuit = true` to stop on the first failure:
+
+```c#
+var pipeline = new ValidationPipeline<User> { ShortCircuit = true }
+    .AddRule(user => ValidateBasicInfo(user))
+    .AddRule(user => ValidateExpensiveCheck(user));  // skipped if first rule fails
+
+// Works with both Validate() and ValidateAsync()
+var result = pipeline.Validate(user);
 ```
 
 ## Best Practices
@@ -317,17 +329,24 @@ private static readonly ValidationKeyDefinition EmailFormatKey =
 
 ### 3. Fail Fast vs. Collect All
 
-The pipeline collects all validation messages by default. For expensive validations, consider short-circuiting:
+The pipeline collects all validation messages by default. To stop on the first failure, use the `ShortCircuit` property:
+
+```c#
+// Pipeline-level short-circuit
+var pipeline = new ValidationPipeline<User> { ShortCircuit = true }
+    .AddRule(user => ValidateBasicInfo(user))
+    .AddRule(user => PerformExpensiveChecks(user));  // skipped if basic fails
+```
+
+For individual rule-level short-circuiting within a single rule function:
 
 ```c#
 private static Result ExpensiveValidation(User user)
 {
-    // Only run expensive validation if basic validation passes
     var basicResult = ValidateBasicInfo(user);
     if (basicResult.IsFailure)
         return basicResult;
-    
-    // Proceed with expensive validation
+
     return PerformExpensiveChecks(user);
 }
 ```

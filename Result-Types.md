@@ -66,7 +66,7 @@ A generic result type that carries a value when successful.
 - `IsSuccessful`: Boolean indicating if the operation succeeded
 - `IsFailure`: Boolean indicating if the operation failed
 - `ValidationMessages`: Collection of validation messages
-- `Value`: The actual value (only available when successful)
+- `Value`: The actual value (throws `InvalidOperationException` if the result is a failure — use `Match`, `Map`, `Bind`, or check `IsSuccessful` first)
 
 **Usage:**
 
@@ -150,52 +150,56 @@ The system provides several extension methods for working with results:
 - `MapAsync<TResult>()`: Asynchronous transformation
 - `Bind<TResult>()`: Chain operations that return results
 - `Match<TResult>()`: Pattern matching for success/failure
+- `Ensure()`: Validate a condition on the value, returning an error if the predicate fails
+- `Do()` / `DoAsync()`: Execute side-effects on successful results
+
+> **Note**: `Filter()` is deprecated — use `Ensure()` instead.
+
+### Task Extensions
+
+- `BindSync<TResult>()`: Bind a `Task<Result<T>>` to a synchronous function
+- `MapSync<TResult>()`: Map a `Task<Result<T>>` using a synchronous mapper
+- `Do()`: Execute a synchronous side-effect on a `Task<Result<T>>`
+- `DoAsync()`: Execute an async side-effect on a `Task<Result<T>>`
 
 ### Collection Extensions
 
-- `MergeResults()`: Combine multiple results
-- `AllSuccessful()`: Check if all results in a collection are successful
-- `GetSuccessfulValues()`: Extract values from successful results
+- `MergeResults()`: Combine multiple results (supports both `IEnumerable<Result>` and `IEnumerable<Result<T>>`)
+- `TraverseAll()`: Transform a collection, failing if any item fails (collects all errors)
+- `TraverseAllAsync()`: Async sequential version of `TraverseAll`
+- `TraverseAllParallelAsync()`: Async parallel version of `TraverseAll`
+- `TraversePartialWithErrors()`: Transform a collection, returning successful values and collecting errors separately
+- `TraversePartialWithErrorsAsync()`: Async sequential version
+- `TraversePartialWithErrorsParallelAsync()`: Async parallel version
 
-### Exception Handling
+### Type Casting
 
-- `Try()`: Wrap synchronous operations and capture exceptions
-- `TryAsync()`: Wrap asynchronous operations and capture exceptions
+- `Cast<TResult>()`: Re-type a failed `Result<T>` to `Result<TResult>`, forwarding all validation messages. Throws `InvalidOperationException` on successful results — use `Map` instead.
 
 ### Memoization Extensions
 
-- `Memoize()`: Cache result computations
-- Result-specific memoization for expensive operations
+- `Memoize()`: Cache function results (supports 1-3 parameter overloads)
+- `MemoizeAsync()`: Cache async function results with per-key locking
+- `MemoizeResult()`: Cache functions that return `Result<T>`
+- `MemoizeResultWithKey()`: Cache `Result<T>` functions using a custom key selector
 
-### Exception Handling with `Try` and `TryAsync`
+### Creating Typed Error Results
 
-The `Result.Try` and `Result.TryAsync` methods allow you to wrap operations that might throw exceptions, automatically converting those exceptions into failure results.
-
-**`Result.Try<T>` (Synchronous)**
-
-Executes a synchronous operation and returns its result as an `Ok(value)`. If an exception occurs, it returns an `Error` with the provided `ValidationKeyDefinition` and the exception message.
+`Result.Error<T>()` provides convenient overloads for creating failed `Result<T>` values:
 
 ```c#
-var key = ValidationKeyDefinition.Create("operation.failed").WithStringParameter("error");
+var key = ValidationKeyDefinition.Create("user.not.found")
+    .WithStringParameter("userId");
 
-var result = Result.Try(
-    () => File.ReadAllText("config.json"),
-    key
-);
+// No parameters
+var result = Result.Error<User>(key);
+
+// Single parameter
+var result = Result.Error<User>(key, "user-123");
+
+// Multiple parameters
+var result = Result.Error<User>(key, new object[] { "user-123" });
 ```
-
-**`Result.TryAsync<T>` (Asynchronous)**
-
-The asynchronous version for `Task`-based operations.
-
-```c#
-var result = await Result.TryAsync(
-    async () => await httpClient.GetStringAsync("https://api.example.com/data"),
-    key
-);
-```
-
-> **Note**: When an exception is caught, the exception message is automatically appended as the last parameter to the provided `ValidationKeyDefinition`. Ensure your key definition includes a parameter for this message if you want it included in the formatted error.
 
 ## Practical Usage Examples
 

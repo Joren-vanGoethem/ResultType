@@ -176,21 +176,52 @@ var result3 = memoizedSquare(3);
 
 ### Multiple Parameters
 
-```c# 
-// Memoize functions with multiple parameters 
-Func<int, int, int> add = (x, y) => 
+```c#
+// Memoize functions with multiple parameters
+Func<int, int, int> add = (x, y) =>
 {
-    Console.WriteLine($"Adding {x} + {y}"); 
+    Console.WriteLine($"Adding {x} + {y}");
     return x + y;
 };
-var memoizedAdd = add.Memoize(); 
-var result1 = memoizedAdd(2, 3); 
-// Prints: "Adding 2 + 3", returns 5 
-var result2 = memoizedAdd(2, 3); 
-// Returns 5 immediately (cached) 
-var result3 = memoizedAdd(3, 2); 
+var memoizedAdd = add.Memoize();
+var result1 = memoizedAdd(2, 3);
+// Prints: "Adding 2 + 3", returns 5
+var result2 = memoizedAdd(2, 3);
+// Returns 5 immediately (cached)
+var result3 = memoizedAdd(3, 2);
 // Prints: "Adding 3 + 2", returns 5 (different order = different cache key)
-``` 
+```
+
+### Async Function Memoization
+
+```c#
+// Memoize an async function — uses per-key locking to prevent concurrent execution for the same input
+Func<string, Task<ApiResponse>> fetchData = async url =>
+{
+    var response = await httpClient.GetAsync(url);
+    return await response.Content.ReadFromJsonAsync<ApiResponse>();
+};
+
+var memoizedFetch = fetchData.MemoizeAsync();
+var result1 = await memoizedFetch("https://api.example.com/data"); // Executes HTTP call
+var result2 = await memoizedFetch("https://api.example.com/data"); // Returns cached result
+```
+
+For more control, use `AsyncMemoizedFunction` directly:
+
+```c#
+var memoized = MemoizationFactory.CreateMemoizedAsync<string, ApiResponse>(fetchData);
+var result = await memoized.InvokeAsync("https://api.example.com/data");
+
+// Check statistics
+Console.WriteLine($"Hits: {memoized.HitCount}, Misses: {memoized.MissCount}");
+Console.WriteLine($"Hit ratio: {memoized.HitRatio:F1}%");
+
+// Cache management
+memoized.ContainsKey("https://api.example.com/data"); // true
+memoized.RemoveFromCache("https://api.example.com/data");
+memoized.ClearCache();
+```
 
 ## Advanced Features
 
@@ -221,15 +252,23 @@ bool exists = memoizedFunction.ContainsKey("world"); // Check if key exists
 
 ### Cache with Expiration and Size Limits
 
-```c# 
-// Create memoized function with expiration and size limits 
-var memoizedWithLimits = MemoizationFactory.CreateMemoized<string, int>( s => s.Length, 
-    maxCacheSize: 100, // Maximum 100 cached items 
-    expiration: TimeSpan.FromMinutes(5) // Items expire after 5 minutes 
+Use `MemoizationFactory.CreateConfigurable` to create a memoized function with TTL expiration and LRU size limits. The returned `ExpiringMemoizedFunction` also tracks hit/miss statistics:
+
+```c#
+// Create memoized function with expiration and size limits
+var memoized = MemoizationFactory.CreateConfigurable<string, int>(
+    s => s.Length,
+    maxCacheSize: 100,                  // Maximum 100 cached items (LRU eviction)
+    expiration: TimeSpan.FromMinutes(5) // Items expire after 5 minutes
 );
 
-var result = memoizedWithLimits("test");
-``` 
+var result = memoized.Invoke("test");
+
+// Statistics available on ExpiringMemoizedFunction
+Console.WriteLine($"Hits: {memoized.HitCount}, Misses: {memoized.MissCount}");
+Console.WriteLine($"Hit ratio: {memoized.HitRatio:F1}%");
+Console.WriteLine($"Cache size: {memoized.CacheSize}");
+```
 
 ### Integration with Result Types
 
