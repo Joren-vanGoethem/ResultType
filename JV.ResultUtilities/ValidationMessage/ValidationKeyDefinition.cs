@@ -236,14 +236,20 @@ namespace JV.ResultUtilities.ValidationMessage
                  }
                  else if (Parameters.Count == 1 || Parameters.Count(p => p.DefaultValue == null) == 1)
                  {
-                     var targetIndex = Parameters.Count == 1 
-                         ? 0 
+                     var targetIndex = Parameters.Count == 1
+                         ? 0
                          : Enumerable.Range(0, Parameters.Count).First(i => Parameters[i].DefaultValue == null);
 
                      for (int i = 0; i < Parameters.Count; i++)
                      {
                          result[i] = Parameters[i].FormatValue(i == targetIndex ? parameters : Parameters[i].DefaultValue);
                      }
+                 }
+                 else
+                 {
+                     // IEnumerable count didn't match and not a single-value scenario.
+                     // Fall through to anonymous object handling (the object may have named properties).
+                     FormatFromReflection(parameters, result);
                  }
             }
             else
@@ -273,23 +279,38 @@ namespace JV.ResultUtilities.ValidationMessage
 
                 if (!handledAsSingleValue)
                 {
-                    var properties = parameters.GetType().GetProperties();
-                    var filteredProps = properties.Where(p => p.CanRead && p.GetIndexParameters().Length == 0).ToList();
+                    FormatFromReflection(parameters, result);
+                }
+            }
 
-                    if (filteredProps.Count > 0)
-                    {
-                        var propDict = filteredProps.ToDictionary(p => p.Name, p => p.GetValue(parameters));
-                        for (int i = 0; i < Parameters.Count; i++)
-                        {
-                            var parameter = Parameters[i];
-                            propDict.TryGetValue(parameter.Name, out var value);
-                            result[i] = parameter.FormatValue(value ?? parameter.DefaultValue);
-                        }
-                    }
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (result[i] == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Parameter '{Parameters[i].Name}' at index {i} was not formatted. " +
+                        $"This indicates a mismatch between ValidateParameters and FormatParameters for input type '{parameters?.GetType().FullName}'.");
                 }
             }
 
             return result;
+        }
+
+        private void FormatFromReflection(object parameters, string[] result)
+        {
+            var properties = parameters.GetType().GetProperties();
+            var filteredProps = properties.Where(p => p.CanRead && p.GetIndexParameters().Length == 0).ToList();
+
+            if (filteredProps.Count > 0)
+            {
+                var propDict = filteredProps.ToDictionary(p => p.Name, p => p.GetValue(parameters));
+                for (int i = 0; i < Parameters.Count; i++)
+                {
+                    var parameter = Parameters[i];
+                    propDict.TryGetValue(parameter.Name, out var value);
+                    result[i] = parameter.FormatValue(value ?? parameter.DefaultValue);
+                }
+            }
         }
     }
 }
