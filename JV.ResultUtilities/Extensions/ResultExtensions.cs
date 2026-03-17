@@ -134,6 +134,7 @@ namespace JV.ResultUtilities.Extensions
                 : Result.Error(errorKey, parameters);
         }
 
+        [Obsolete("Use Ensure instead. Filter is an alias for Ensure and will be removed in a future version.")]
         public static Result<T> Filter<T>(this Result<T> result,
             Func<T, bool> predicate,
             ValidationKeyDefinition errorKey,
@@ -154,6 +155,30 @@ namespace JV.ResultUtilities.Extensions
             if (result.IsSuccessful)
                 await action(result.Value);
             return result;
+        }
+
+        public static async Task<Result<T>> DoAsync<T>(this Task<Result<T>> resultTask, Func<T, Task> action)
+        {
+            var result = await resultTask;
+            if (result.IsSuccessful)
+                await action(result.Value);
+            return result;
+        }
+
+        public static async Task<Result<T>> Do<T>(this Task<Result<T>> resultTask, Action<T> action)
+        {
+            var result = await resultTask;
+            if (result.IsSuccessful)
+                action(result.Value);
+            return result;
+        }
+
+        /// <summary>
+        /// Merges a typed result with a collection of non-generic results, combining all validation messages.
+        /// </summary>
+        public static Result<T> MergeResults<T>(this Result<T> result, IEnumerable<Result> results)
+        {
+            return result.Merge(results.ToArray());
         }
     }
 }

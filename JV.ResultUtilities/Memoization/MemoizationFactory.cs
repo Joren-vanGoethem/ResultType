@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace JV.ResultUtilities.Memoization;
 
@@ -40,5 +41,25 @@ public static class MemoizationFactory
         Func<TKey, TResult> function) where TKey : notnull
     {
         return new MemoizedFunction<TKey, TResult>(function);
+    }
+
+    /// <summary>
+    /// Creates a configurable memoized function with cache size limit and expiration.
+    /// </summary>
+    public static ExpiringMemoizedFunction<TKey, TResult> CreateConfigurable<TKey, TResult>(
+        Func<TKey, TResult> function,
+        int? maxCacheSize = null,
+        TimeSpan? expiration = null) where TKey : notnull
+    {
+        return new ExpiringMemoizedFunction<TKey, TResult>(function, maxCacheSize, expiration);
+    }
+
+    /// <summary>
+    /// Creates a configurable memoized async function with statistics tracking.
+    /// </summary>
+    public static AsyncMemoizedFunction<TKey, TResult> CreateMemoizedAsync<TKey, TResult>(
+        Func<TKey, Task<TResult>> function) where TKey : notnull
+    {
+        return new AsyncMemoizedFunction<TKey, TResult>(function);
     }
 }

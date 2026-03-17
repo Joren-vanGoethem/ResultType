@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace JV.ResultUtilities.Memoization.Extensions;
 
@@ -64,10 +65,21 @@ public static class MemoizationExtensions
     /// <typeparam name="TResult">The type of the function result</typeparam>
     /// <param name="func">The function to memoize</param>
     /// <returns>A memoized version of the function</returns>
-    public static Func<T1, T2, T3, TResult> Memoize<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func) 
+    public static Func<T1, T2, T3, TResult> Memoize<T1, T2, T3, TResult>(this Func<T1, T2, T3, TResult> func)
         where T1 : notnull where T2 : notnull where T3 : notnull
     {
         var cache = new ConcurrentDictionary<(T1, T2, T3), TResult>();
         return (input1, input2, input3) => cache.GetOrAdd((input1, input2, input3), key => func(key.Item1, key.Item2, key.Item3));
+    }
+
+    /// <summary>
+    /// Creates a memoized version of an async function with one parameter.
+    /// Results are cached based on the input parameter value.
+    /// Uses a lock per key to prevent concurrent execution for the same input.
+    /// </summary>
+    public static Func<T, Task<TResult>> MemoizeAsync<T, TResult>(this Func<T, Task<TResult>> func) where T : notnull
+    {
+        var memoized = new AsyncMemoizedFunction<T, TResult>(func);
+        return key => memoized.InvokeAsync(key);
     }
 }
