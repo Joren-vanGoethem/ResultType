@@ -643,4 +643,51 @@ public class AsyncResultExtensionsTests
     }
 
     #endregion
+
+    #region MapSync Tests
+
+    [Fact]
+    public async Task MapSync_WithSuccessfulResult_MapsValueCorrectly()
+    {
+        // Arrange
+        var successResult = Task.FromResult(Result.Ok(10));
+
+        // Act
+        var result = await successResult.MapSync(value => value * 2);
+
+        // Assert
+        Assert.True(result.IsSuccessful);
+        Assert.Equal(20, result.Value);
+    }
+
+    [Fact]
+    public async Task MapSync_WithFailedResult_PreservesErrors()
+    {
+        // Arrange
+        var errorMessage = ValidationMessage.Create(_errorKey, "Original error");
+        var failedResult = Task.FromResult(Result.Create<int>(default, new[] { errorMessage }));
+
+        // Act
+        var result = await failedResult.MapSync(value => value * 2);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Single(result.ValidationMessages);
+    }
+
+    [Fact]
+    public async Task MapSync_WithSuccessfulResult_CanMapToDifferentType()
+    {
+        // Arrange
+        var successResult = Task.FromResult(Result.Ok(42));
+
+        // Act
+        var result = await successResult.MapSync(value => $"Number: {value}");
+
+        // Assert
+        Assert.True(result.IsSuccessful);
+        Assert.Equal("Number: 42", result.Value);
+    }
+
+    #endregion
 }

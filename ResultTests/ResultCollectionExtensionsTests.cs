@@ -230,6 +230,103 @@ namespace ResultTests
             Assert.Equal(2, result.Value.Count()); // Only John and Alice should succeed
         }
 
+        [Fact]
+        public async Task TraverseAllParallelAsync_WithAllSuccessful_ReturnsAllResults()
+        {
+            // Arrange
+            var source = new[] { "a", "b", "c" };
+
+            // Act
+            var result = await source.TraverseAllParallelAsync(async x =>
+            {
+                await Task.Delay(1);
+                return Result.Ok(x.ToUpper());
+            });
+
+            // Assert
+            Assert.True(result.IsSuccessful);
+            Assert.Equal(new[] { "A", "B", "C" }, result.Value);
+        }
+
+        [Fact]
+        public async Task TraverseAllParallelAsync_WithFailures_ReturnsAllErrors()
+        {
+            // Arrange
+            var source = new[] { "valid", "invalid", "ok" };
+
+            // Act
+            var result = await source.TraverseAllParallelAsync(async x =>
+            {
+                await Task.Delay(1);
+                return x.Contains("invalid")
+                    ? Result.Error(ProcessingErrorKey, x)
+                    : Result.Ok(x.ToUpper());
+            });
+
+            // Assert
+            Assert.True(result.IsFailure);
+            Assert.Single(result.ValidationMessages);
+        }
+
+        [Fact]
+        public async Task TraversePartialParallelAsync_WithMixedResults_ReturnsOnlySuccessful()
+        {
+            // Arrange
+            var source = new[] { "apple", "banana", "cherry", "date" };
+
+            // Act
+            var result = await source.TraversePartialParallelAsync(async x =>
+            {
+                await Task.Delay(1);
+                return x.Length > 5
+                    ? Result.Error(ProcessingErrorKey, x)
+                    : Result.Ok(x.Length);
+            });
+
+            // Assert
+            Assert.True(result.IsSuccessful);
+            Assert.Equal(new[] { 5, 4 }, result.Value); // "apple" and "date"
+        }
+
+        [Fact]
+        public void TraversePartialWithErrors_ReturnsBothSuccessesAndErrors()
+        {
+            // Arrange
+            var source = new[] { 1, 2, 3, 4, 5 };
+
+            // Act
+            var (results, errors) = source.TraversePartialWithErrors(x =>
+                x % 2 == 0
+                    ? Result.Error(ValidationErrorKey, x)
+                    : Result.Ok(x * 10));
+
+            // Assert
+            Assert.True(results.IsSuccessful);
+            Assert.Equal(new[] { 10, 30, 50 }, results.Value);
+            Assert.Equal(2, errors.Count()); // 2 and 4 failed
+        }
+
+        [Fact]
+        public async Task TraversePartialWithErrorsAsync_ReturnsBothSuccessesAndErrors()
+        {
+            // Arrange
+            var source = new[] { "ok", "bad", "fine" };
+
+            // Act
+            var (results, errors) = await source.TraversePartialWithErrorsAsync(async x =>
+            {
+                await Task.Delay(1);
+                return x == "bad"
+                    ? Result.Error(ProcessingErrorKey, x)
+                    : Result.Ok(x.ToUpper());
+            });
+
+            // Assert
+            Assert.True(results.IsSuccessful);
+            Assert.Equal(new[] { "OK", "FINE" }, results.Value);
+            Assert.Single(errors);
+        }
+
         private static Result<string> ValidateUser(dynamic request)
         {
             var errors = new List<ValidationMessage>();

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <!-- Product validation messages -->
+  <data name="product.name.required" xml:space="preserve"><value>Product name is required.</value></data>
+  <data name="product.name.length" xml:space="preserve"><value>Product name '{0}' must be between {1} and {2} characters.</value></data>
+  <data name="product.sku.required" xml:space="preserve"><value>Product SKU is required.</value></data>
+  <data name="product.sku.duplicate" xml:space="preserve"><value>A product with SKU '{0}' already exists.</value></data>
+  <data name="product.price.invalid" xml:space="preserve"><value>Price must be greater than {0}.</value></data>
+  <data name="product.category.invalid" xml:space="preserve"><value>Category '{0}' is not valid.</value></data>
+  <data name="product.stock.negative" xml:space="preserve"><value>Stock quantity cannot be negative.</value></data>
+  <data name="product.not_found" xml:space="preserve"><value>Product with ID '{0}' was not found.</value></data>
+  <data name="product.inactive" xml:space="preserve"><value>Product '{0}' is no longer active.</value></data>
+  <data name="product.save_failed" xml:space="preserve"><value>Failed to save product: {0}</value></data>
+
+  <!-- Order validation messages -->
+  <data name="order.customer_name.required" xml:space="preserve"><value>Customer name is required.</value></data>
+  <data name="order.customer_email.invalid" xml:space="preserve"><value>'{0}' is not a valid email address.</value></data>
+  <data name="order.customer_phone.invalid" xml:space="preserve"><value>Phone number '{0}' is not valid.</value></data>
+  <data name="order.lines.empty" xml:space="preserve"><value>Order must contain at least one item.</value></data>
+  <data name="order.line.quantity.invalid" xml:space="preserve"><value>Quantity must be between {0} and {1}.</value></data>
+  <data name="order.line.product_not_found" xml:space="preserve"><value>Product '{0}' was not found.</value></data>
+  <data name="order.line.insufficient_stock" xml:space="preserve"><value>Only {0} units of '{1}' are available, but {2} were requested.</value></data>
+  <data name="order.shipping_deadline.past" xml:space="preserve"><value>Shipping deadline '{0}' is in the past.</value></data>
+  <data name="order.delivery_time.invalid" xml:space="preserve"><value>Preferred delivery time '{0}' must be between 08:00 and 20:00.</value></data>
+  <data name="order.estimated_delivery.invalid" xml:space="preserve"><value>Estimated delivery duration '{0}' is not valid.</value></data>
+  <data name="order.date.invalid" xml:space="preserve"><value>Order date '{0}' is not valid.</value></data>
+  <data name="order.priority.not_available" xml:space="preserve"><value>Priority delivery (requested: {0}) is not currently available.</value></data>
+  <data name="order.tracking_uri.invalid" xml:space="preserve"><value>Tracking URI '{0}' is not a valid URL.</value></data>
+  <data name="order.not_found" xml:space="preserve"><value>Order with ID '{0}' was not found.</value></data>
+  <data name="order.cannot_cancel" xml:space="preserve"><value>Order '{0}' with status '{1}' cannot be cancelled.</value></data>
+  <data name="order.cannot_ship" xml:space="preserve"><value>Order '{0}' with status '{1}' cannot be shipped.</value></data>
+  <data name="order.save_failed" xml:space="preserve"><value>Failed to save order: {0}</value></data>
+</root>

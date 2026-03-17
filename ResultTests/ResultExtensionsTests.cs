@@ -365,6 +365,78 @@ namespace ResultTests
             Assert.True(finalResult.IsFailure);
         }
 
+        [Fact]
+        public async Task DoAsync_OnTaskResult_WithSuccessfulResult_ExecutesAction()
+        {
+            // Arrange
+            var resultTask = Task.FromResult(Result.Ok(42));
+            var capturedValue = 0;
+
+            // Act
+            var finalResult = await resultTask.DoAsync(async value =>
+            {
+                await Task.Delay(1);
+                capturedValue = value;
+            });
+
+            // Assert
+            Assert.Equal(42, capturedValue);
+            Assert.True(finalResult.IsSuccessful);
+        }
+
+        [Fact]
+        public async Task DoAsync_OnTaskResult_WithFailedResult_DoesNotExecuteAction()
+        {
+            // Arrange
+            Task<Result<int>> resultTask = Task.FromResult((Result<int>)Result.Error(TestErrorKey, "Error"));
+            var actionExecuted = false;
+
+            // Act
+            var finalResult = await resultTask.DoAsync(async value =>
+            {
+                await Task.Delay(1);
+                actionExecuted = true;
+            });
+
+            // Assert
+            Assert.False(actionExecuted);
+            Assert.True(finalResult.IsFailure);
+        }
+
+        [Fact]
+        public async Task Do_OnTaskResult_WithSuccessfulResult_ExecutesAction()
+        {
+            // Arrange
+            var resultTask = Task.FromResult(Result.Ok("test"));
+            var capturedValue = string.Empty;
+
+            // Act
+            var finalResult = await resultTask.Do(value => capturedValue = value);
+
+            // Assert
+            Assert.Equal("test", capturedValue);
+            Assert.True(finalResult.IsSuccessful);
+        }
+
+        [Fact]
+        public void MergeResults_TypedWithNonGeneric_CombinesMessages()
+        {
+            // Arrange
+            var typedResult = Result.Ok(42).Merge(Result.Error(TestErrorKey, "Error 1"));
+            var otherResults = new[]
+            {
+                Result.Error(TestErrorKey, "Error 2"),
+                Result.Ok()
+            };
+
+            // Act
+            var merged = typedResult.MergeResults(otherResults);
+
+            // Assert
+            Assert.True(merged.IsFailure);
+            Assert.Equal(2, merged.ValidationMessages.Count());
+        }
+
         private static Result CreateCountingResult(ref int counter, bool shouldSucceed)
         {
             counter++;

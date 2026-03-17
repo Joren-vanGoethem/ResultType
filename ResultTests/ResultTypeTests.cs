@@ -126,6 +126,122 @@ public class ResultTypeTests
     /// which is essential for collecting multiple validation errors across different operations.
     /// </summary>
     [Fact]
+    public void ResultOfT_Value_ThrowsOnFailure()
+    {
+        // Arrange
+        Result<string> result = Result.Error(
+            ValidationKeyDefinition.Create("error.key").WithStringParameter("msg"), "fail");
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => result.Value);
+    }
+
+    [Fact]
+    public void Result_ErrorOfT_CreatesTypedError()
+    {
+        // Arrange
+        var key = ValidationKeyDefinition.Create("typed.error");
+
+        // Act
+        var result = Result.Error<int>(key);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Single(result.ValidationMessages);
+    }
+
+    [Fact]
+    public void Result_ErrorOfT_WithParameter_CreatesTypedError()
+    {
+        // Arrange
+        var key = ValidationKeyDefinition.Create("typed.error").WithStringParameter("detail");
+
+        // Act
+        var result = Result.Error<int>(key, "some detail");
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal("some detail", result.ValidationMessages.First().Parameters[0]);
+    }
+
+    [Fact]
+    public void ResultOfT_Cast_ForwardsFailure()
+    {
+        // Arrange
+        var key = ValidationKeyDefinition.Create("cast.error").WithStringParameter("msg");
+        Result<int> original = Result.Error(key, "original error");
+
+        // Act
+        var casted = original.Cast<string>();
+
+        // Assert
+        Assert.True(casted.IsFailure);
+        Assert.Equal(original.ValidationMessages.Count(), casted.ValidationMessages.Count());
+    }
+
+    [Fact]
+    public void ResultOfT_Cast_ThrowsOnSuccess()
+    {
+        var result = Result.Ok(42);
+
+        Assert.Throws<InvalidOperationException>(() => result.Cast<string>());
+    }
+
+    [Fact]
+    public void Result_Try_Action_Success()
+    {
+        var key = ValidationKeyDefinition.Create("try.error").WithStringParameter("msg");
+        var executed = false;
+
+        var result = Result.Try(() => { executed = true; }, key);
+
+        Assert.True(result.IsSuccessful);
+        Assert.True(executed);
+    }
+
+    [Fact]
+    public void Result_Try_Action_Failure()
+    {
+        var key = ValidationKeyDefinition.Create("try.error").WithStringParameter("msg");
+
+        var result = Result.Try(() => throw new InvalidOperationException("boom"), key);
+
+        Assert.True(result.IsFailure);
+        Assert.Contains("boom", result.ValidationMessages.First().Parameters[0]);
+    }
+
+    [Fact]
+    public async Task Result_TryAsync_Task_Success()
+    {
+        var key = ValidationKeyDefinition.Create("try.error").WithStringParameter("msg");
+        var executed = false;
+
+        var result = await Result.TryAsync(async () =>
+        {
+            await Task.Delay(1);
+            executed = true;
+        }, key);
+
+        Assert.True(result.IsSuccessful);
+        Assert.True(executed);
+    }
+
+    [Fact]
+    public async Task Result_TryAsync_Task_Failure()
+    {
+        var key = ValidationKeyDefinition.Create("try.error").WithStringParameter("msg");
+
+        var result = await Result.TryAsync(async () =>
+        {
+            await Task.Delay(1);
+            throw new InvalidOperationException("async boom");
+        }, key);
+
+        Assert.True(result.IsFailure);
+        Assert.Contains("async boom", result.ValidationMessages.First().Parameters[0]);
+    }
+
+    [Fact]
     public void ResultOfT_Merge_CombinesValidationMessages()
     {
         // Arrange

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <!-- Product validatieberichten -->
+  <data name="product.name.required" xml:space="preserve"><value>Productnaam is verplicht.</value></data>
+  <data name="product.name.length" xml:space="preserve"><value>Productnaam '{0}' moet tussen {1} en {2} tekens lang zijn.</value></data>
+  <data name="product.sku.required" xml:space="preserve"><value>Product-SKU is verplicht.</value></data>
+  <data name="product.sku.duplicate" xml:space="preserve"><value>Er bestaat al een product met SKU '{0}'.</value></data>
+  <data name="product.price.invalid" xml:space="preserve"><value>Prijs moet hoger zijn dan {0}.</value></data>
+  <data name="product.category.invalid" xml:space="preserve"><value>Categorie '{0}' is niet geldig.</value></data>
+  <data name="product.stock.negative" xml:space="preserve"><value>Voorraad kan niet negatief zijn.</value></data>
+  <data name="product.not_found" xml:space="preserve"><value>Product met ID '{0}' is niet gevonden.</value></data>
+  <data name="product.inactive" xml:space="preserve"><value>Product '{0}' is niet meer actief.</value></data>
+  <data name="product.save_failed" xml:space="preserve"><value>Opslaan van product mislukt: {0}</value></data>
+
+  <!-- Bestelling validatieberichten -->
+  <data name="order.customer_name.required" xml:space="preserve"><value>Klantnaam is verplicht.</value></data>
+  <data name="order.customer_email.invalid" xml:space="preserve"><value>'{0}' is geen geldig e-mailadres.</value></data>
+  <data name="order.customer_phone.invalid" xml:space="preserve"><value>Telefoonnummer '{0}' is niet geldig.</value></data>
+  <data name="order.lines.empty" xml:space="preserve"><value>Bestelling moet minstens één artikel bevatten.</value></data>
+  <data name="order.line.quantity.invalid" xml:space="preserve"><value>Aantal moet tussen {0} en {1} liggen.</value></data>
+  <data name="order.line.product_not_found" xml:space="preserve"><value>Product '{0}' is niet gevonden.</value></data>
+  <data name="order.line.insufficient_stock" xml:space="preserve"><value>Slechts {0} stuks van '{1}' beschikbaar, maar {2} aangevraagd.</value></data>
+  <data name="order.shipping_deadline.past" xml:space="preserve"><value>Verzenddatum '{0}' ligt in het verleden.</value></data>
+  <data name="order.delivery_time.invalid" xml:space="preserve"><value>Gewenste bezorgtijd '{0}' moet tussen 08:00 en 20:00 liggen.</value></data>
+  <data name="order.estimated_delivery.invalid" xml:space="preserve"><value>Geschatte bezorgduur '{0}' is niet geldig.</value></data>
+  <data name="order.date.invalid" xml:space="preserve"><value>Besteldatum '{0}' is niet geldig.</value></data>
+  <data name="order.priority.not_available" xml:space="preserve"><value>Prioriteitsbezorging (aangevraagd: {0}) is momenteel niet beschikbaar.</value></data>
+  <data name="order.tracking_uri.invalid" xml:space="preserve"><value>Tracking-URL '{0}' is geen geldige URL.</value></data>
+  <data name="order.not_found" xml:space="preserve"><value>Bestelling met ID '{0}' is niet gevonden.</value></data>
+  <data name="order.cannot_cancel" xml:space="preserve"><value>Bestelling '{0}' met status '{1}' kan niet worden geannuleerd.</value></data>
+  <data name="order.cannot_ship" xml:space="preserve"><value>Bestelling '{0}' met status '{1}' kan niet worden verzonden.</value></data>
+  <data name="order.save_failed" xml:space="preserve"><value>Opslaan van bestelling mislukt: {0}</value></data>
+</root>

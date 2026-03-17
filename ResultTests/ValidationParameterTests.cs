@@ -162,8 +162,11 @@ public class ValidationParameterTests
         var parameter = new ValidationParameter("severity", ParameterType.Enum);
 
         // Act & Assert
-
-        Assert.False(parameter.ValidateValue("not an enum"));
+        Assert.True(parameter.ValidateValue(DayOfWeek.Monday));
+        Assert.True(parameter.ValidateValue("Active")); // String fallback for enum names
+        Assert.False(parameter.ValidateValue(""));
+        Assert.False(parameter.ValidateValue("  "));
+        Assert.False(parameter.ValidateValue(123));
     }
 
     /// <summary>

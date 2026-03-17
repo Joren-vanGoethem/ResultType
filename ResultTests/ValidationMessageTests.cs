@@ -114,6 +114,86 @@ public class ValidationMessageTests
     /// This test ensures error messages can be properly formatted for display to users or logging.
     /// </summary>
     [Fact]
+    public void CreateLenient_SkipsParameterTypeValidation()
+    {
+        // Arrange
+        var keyDefinition = ValidationKeyDefinition.Create("error.key", "Error Key")
+            .WithIntParameter("count");
+
+        // Act - passing a string for an int parameter, should not throw
+        var message = ValidationMessage.CreateLenient(keyDefinition, "not-an-int");
+
+        // Assert
+        Assert.Equal("Error Key", message.TranslationKey);
+        Assert.Single(message.Parameters);
+        Assert.Equal("not-an-int", message.Parameters[0]);
+    }
+
+    [Fact]
+    public void Create_WithSingleDecimalParameter_DoesNotThrow()
+    {
+        // Regression: decimal has a 'Scale' property via reflection, which caused the
+        // anonymous object branch to fire before the single-value fallback
+        var keyDefinition = ValidationKeyDefinition.Create("price.error")
+            .WithDecimalParameter("minPrice");
+
+        var message = ValidationMessage.Create(keyDefinition, 0m);
+
+        Assert.Equal("price.error", message.TranslationKey);
+        Assert.Single(message.Parameters);
+        Assert.Equal("0", message.Parameters[0]);
+    }
+
+    [Fact]
+    public void Create_WithSingleGuidParameter_DoesNotThrow()
+    {
+        var keyDefinition = ValidationKeyDefinition.Create("id.error")
+            .WithGuidParameter("id");
+        var id = Guid.NewGuid();
+
+        var message = ValidationMessage.Create(keyDefinition, id);
+
+        Assert.Equal(id.ToString(), message.Parameters[0]);
+    }
+
+    [Fact]
+    public void RawParameters_PreservesOriginalValues()
+    {
+        // Arrange
+        var keyDefinition = ValidationKeyDefinition.Create("error.key", "Error Key")
+            .WithStringParameter("name")
+            .WithIntParameter("count");
+
+        // Act
+        var message = ValidationMessage.Create(keyDefinition, "John", 5);
+
+        // Assert
+        Assert.NotNull(message.RawParameters);
+        Assert.Equal(2, message.RawParameters!.Length);
+        Assert.Equal("John", message.RawParameters[0]);
+        Assert.Equal(5, message.RawParameters[1]);
+    }
+
+    [Fact]
+    public void FieldName_CanBeSetOnValidationKeyDefinition()
+    {
+        // Arrange & Act
+        var keyDefinition = ValidationKeyDefinition.Create("error.key", "Error Key")
+            .WithStringParameter("name")
+            .WithFieldName("UserName");
+
+        // Assert
+        Assert.Equal("UserName", keyDefinition.FieldName);
+    }
+
+    [Fact]
+    public void FieldName_IsNullByDefault()
+    {
+        var keyDefinition = ValidationKeyDefinition.Create("error.key");
+        Assert.Null(keyDefinition.FieldName);
+    }
+
+    [Fact]
     public void MapToErrorMessage_ReturnsFormattedMessage()
     {
         // Arrange

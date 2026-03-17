@@ -1,6 +1,8 @@
 using JV.ResultUtilities;
+using JV.ResultUtilities.Extensions;
 using JV.ResultUtilities.Memoization;
 using JV.ResultUtilities.Memoization.Extensions;
+using JV.ResultUtilities.ValidationMessage;
 
 namespace ResultTests;
 
@@ -163,6 +165,104 @@ public class MemoizationTests
         Assert.Equal(0, memoizedFunction.HitCount);
         Assert.Equal(0, memoizedFunction.MissCount);
         Assert.False(memoizedFunction.ContainsKey(2));
+    }
+
+    [Fact]
+    public void MemoizeResultWithKey_CachesResultByKey()
+    {
+        // Arrange
+        var executionCount = 0;
+        Func<string, Result<int>> parseFunction = input =>
+        {
+            executionCount++;
+            return int.TryParse(input, out var val) ? Result.Ok(val) : Result.Error(
+                ValidationKeyDefinition.Create("parse.error").WithStringParameter("input"), input);
+        };
+
+        // Act - memoize by first character as key
+        var memoized = parseFunction.MemoizeResultWithKey(s => s[0]);
+
+        var result1 = memoized("123");
+        var result2 = memoized("1abc"); // Same key '1', should use cache
+        var result3 = memoized("456"); // Different key '4', should execute
+
+        // Assert
+        Assert.True(result1.IsSuccessful);
+        Assert.Equal(123, result1.Value);
+        Assert.True(result2.IsSuccessful); // Cached from result1
+        Assert.Equal(123, result2.Value);
+        Assert.True(result3.IsSuccessful);
+        Assert.Equal(456, result3.Value);
+        Assert.Equal(2, executionCount); // Only 2 executions
+    }
+
+    [Fact]
+    public void ExpiringMemoizedFunction_TracksStatistics()
+    {
+        // Arrange
+        var expiring = MemoizationFactory.CreateConfigurable<int, string>(
+            i => i.ToString(),
+            maxCacheSize: 10,
+            expiration: TimeSpan.FromMinutes(5));
+
+        // Act
+        expiring.Invoke(1);
+        expiring.Invoke(1); // hit
+        expiring.Invoke(2); // miss
+
+        // Assert
+        Assert.Equal(1, expiring.HitCount);
+        Assert.Equal(2, expiring.MissCount);
+        Assert.Equal(3, expiring.TotalAccesses);
+        Assert.Equal(2, expiring.CacheSize);
+    }
+
+    [Fact]
+    public async Task MemoizeAsync_CachesAsyncResults()
+    {
+        // Arrange
+        var executionCount = 0;
+        Func<int, Task<int>> asyncFunction = async key =>
+        {
+            Interlocked.Increment(ref executionCount);
+            await Task.Delay(10);
+            return key * key;
+        };
+
+        var memoized = asyncFunction.MemoizeAsync();
+
+        // Act
+        var result1 = await memoized(5);
+        var result2 = await memoized(5); // Should use cache
+        var result3 = await memoized(3); // Different key
+
+        // Assert
+        Assert.Equal(25, result1);
+        Assert.Equal(25, result2);
+        Assert.Equal(9, result3);
+        Assert.Equal(2, executionCount);
+    }
+
+    [Fact]
+    public async Task AsyncMemoizedFunction_TracksStatistics()
+    {
+        // Arrange
+        var memoized = MemoizationFactory.CreateMemoizedAsync<string, int>(
+            async key =>
+            {
+                await Task.Delay(1);
+                return key.Length;
+            });
+
+        // Act
+        await memoized.InvokeAsync("hello");
+        await memoized.InvokeAsync("hello"); // hit
+        await memoized.InvokeAsync("world"); // miss
+
+        // Assert
+        Assert.Equal(1, memoized.HitCount);
+        Assert.Equal(2, memoized.MissCount);
+        Assert.Equal(2, memoized.CacheSize);
     }
 
     /// <summary>
