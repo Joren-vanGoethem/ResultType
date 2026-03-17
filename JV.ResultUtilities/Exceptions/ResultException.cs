@@ -22,23 +22,28 @@ public sealed class ResultException : Exception
   {
     ValidationMessages = [validationMessage];
   }
+  
+  public ResultException(ValidationMessage.ValidationMessage[] validationMessages)
+    : base(string.Join("; ", validationMessages.Select(m => m.MapToErrorMessage())))
+  {
+    ValidationMessages = validationMessages;
+  }
+  
+  public ResultException(IList<ValidationMessage.ValidationMessage> validationMessages)
+    : base(string.Join("; ", validationMessages.Select(m => m.MapToErrorMessage())))
+  {
+    ValidationMessages = validationMessages;
+  }
+  
+  public ResultException(IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
+    : base(string.Join("; ", validationMessages.Select(m => m.MapToErrorMessage())))
+  {
+    ValidationMessages = validationMessages;
+  }
 
   public ResultException(ValidationKeyDefinition validationKey)
     : base($"ValidationKey: {validationKey.TranslationKey}")
   {
     ValidationMessages = [ValidationMessage.ValidationMessage.Create(validationKey)];
-  }
-}
-
-
-[Serializable]
-public sealed class ResultException<TValue> : Exception
-{
-  public IEnumerable<ValidationMessage.ValidationMessage> ValidationMessages { get; }
-
-  public ResultException(Result<TValue> result)
-    : base(string.Join("; ", result.ValidationMessages.Select(m => m.MapToErrorMessage())))
-  {
-    ValidationMessages = result.ValidationMessages;
   }
 }

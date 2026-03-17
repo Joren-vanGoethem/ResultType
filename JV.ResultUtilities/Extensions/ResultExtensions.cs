@@ -18,7 +18,7 @@ namespace JV.ResultUtilities.Extensions
         public static void ThrowIfFailure<TValue>(this Result<TValue> result)
         {
             if (result.IsFailure)
-                throw new ResultException<TValue>(result);
+                throw new ResultException(result.ValidationMessages);
         }
         
         /// <summary>
