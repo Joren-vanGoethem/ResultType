@@ -10,12 +10,29 @@ namespace JV.ResultUtilities.ValidationMessage
         public string TranslationKey { get; }
         public IReadOnlyList<ValidationParameter> Parameters { get; }
 
+        /// <summary>
+        /// Optional field name associated with this validation key, useful for mapping errors to form fields.
+        /// </summary>
+        public string? FieldName { get; }
+
         private ValidationKeyDefinition(string key, string translationKey,
-            IEnumerable<ValidationParameter> parameters)
+            IEnumerable<ValidationParameter> parameters, string? fieldName = null)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
             TranslationKey = translationKey ?? throw new ArgumentNullException(nameof(translationKey));
             Parameters = parameters?.ToList().AsReadOnly() ?? new List<ValidationParameter>().AsReadOnly();
+            FieldName = fieldName;
+        }
+
+        /// <summary>
+        /// Sets the field name associated with this validation key.
+        /// </summary>
+        public ValidationKeyDefinition WithFieldName(string fieldName)
+        {
+            if (string.IsNullOrWhiteSpace(fieldName))
+                throw new ArgumentException($"'{nameof(fieldName)}' cannot be null or whitespace.", nameof(fieldName));
+            
+            return new ValidationKeyDefinition(Key, TranslationKey, Parameters, fieldName);
         }
 
         public static ValidationKeyDefinition Create(string key, string translationKey)
@@ -90,7 +107,7 @@ namespace JV.ResultUtilities.ValidationMessage
             {
                 var list = new List<object>();
                 foreach (var item in enumerable) list.Add(item);
-                
+
                 if (list.Count == Parameters.Count)
                 {
                     for (int i = 0; i < Parameters.Count; i++)
@@ -102,6 +119,19 @@ namespace JV.ResultUtilities.ValidationMessage
                 }
             }
 
+            // Single-value check — must come before anonymous object check because primitive types
+            // like decimal, Guid, DateTime etc. have reflection properties that would falsely match
+            // the anonymous object branch
+            if (Parameters.Count == 1 || Parameters.Count(p => p.DefaultValue == null) == 1)
+            {
+                var targetParam = Parameters.Count == 1
+                    ? Parameters[0]
+                    : Parameters.First(p => p.DefaultValue == null);
+
+                if (targetParam.ValidateValue(parameters))
+                    return true;
+            }
+
             // Support anonymous objects
             var properties = parameters.GetType().GetProperties();
             if (properties.Length > 0 && properties.Any(p => p.CanRead && p.GetIndexParameters().Length == 0))
@@ -109,7 +139,7 @@ namespace JV.ResultUtilities.ValidationMessage
                 var propDict = properties
                     .Where(p => p.CanRead && p.GetIndexParameters().Length == 0)
                     .ToDictionary(p => p.Name, p => p.GetValue(parameters));
-            
+
                 foreach (var parameter in Parameters)
                 {
                     if (propDict.TryGetValue(parameter.Name, out var value))
@@ -206,8 +236,8 @@ namespace JV.ResultUtilities.ValidationMessage
                  }
                  else if (Parameters.Count == 1 || Parameters.Count(p => p.DefaultValue == null) == 1)
                  {
-                     var targetIndex = Parameters.Count == 1 
-                         ? 0 
+                     var targetIndex = Parameters.Count == 1
+                         ? 0
                          : Enumerable.Range(0, Parameters.Count).First(i => Parameters[i].DefaultValue == null);
 
                      for (int i = 0; i < Parameters.Count; i++)
@@ -215,36 +245,72 @@ namespace JV.ResultUtilities.ValidationMessage
                          result[i] = Parameters[i].FormatValue(i == targetIndex ? parameters : Parameters[i].DefaultValue);
                      }
                  }
+                 else
+                 {
+                     // IEnumerable count didn't match and not a single-value scenario.
+                     // Fall through to anonymous object handling (the object may have named properties).
+                     FormatFromReflection(parameters, result);
+                 }
             }
             else
             {
-                var properties = parameters.GetType().GetProperties();
-                var filteredProps = properties.Where(p => p.CanRead && p.GetIndexParameters().Length == 0).ToList();
-                
-                if (filteredProps.Count > 0)
+                // Single-value check first — primitives like decimal/Guid have reflection properties
+                // that would falsely match the anonymous object branch
+                bool handledAsSingleValue = false;
+                if (Parameters.Count == 1 || Parameters.Count(p => p.DefaultValue == null) == 1)
                 {
-                    var propDict = filteredProps.ToDictionary(p => p.Name, p => p.GetValue(parameters));
-                    for (int i = 0; i < Parameters.Count; i++)
+                    var targetParam = Parameters.Count == 1
+                        ? Parameters[0]
+                        : Parameters.First(p => p.DefaultValue == null);
+
+                    if (targetParam.ValidateValue(parameters))
                     {
-                        var parameter = Parameters[i];
-                        propDict.TryGetValue(parameter.Name, out var value);
-                        result[i] = parameter.FormatValue(value ?? parameter.DefaultValue);
+                        var targetIndex = Parameters.Count == 1
+                            ? 0
+                            : Enumerable.Range(0, Parameters.Count).First(i => Parameters[i].DefaultValue == null);
+
+                        for (int i = 0; i < Parameters.Count; i++)
+                        {
+                            result[i] = Parameters[i].FormatValue(i == targetIndex ? parameters : Parameters[i].DefaultValue);
+                        }
+                        handledAsSingleValue = true;
                     }
                 }
-                else if (Parameters.Count == 1 || Parameters.Count(p => p.DefaultValue == null) == 1)
-                {
-                    var targetIndex = Parameters.Count == 1 
-                        ? 0 
-                        : Enumerable.Range(0, Parameters.Count).First(i => Parameters[i].DefaultValue == null);
 
-                    for (int i = 0; i < Parameters.Count; i++)
-                    {
-                        result[i] = Parameters[i].FormatValue(i == targetIndex ? parameters : Parameters[i].DefaultValue);
-                    }
+                if (!handledAsSingleValue)
+                {
+                    FormatFromReflection(parameters, result);
+                }
+            }
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (result[i] == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Parameter '{Parameters[i].Name}' at index {i} was not formatted. " +
+                        $"This indicates a mismatch between ValidateParameters and FormatParameters for input type '{parameters?.GetType().FullName}'.");
                 }
             }
 
             return result;
+        }
+
+        private void FormatFromReflection(object parameters, string[] result)
+        {
+            var properties = parameters.GetType().GetProperties();
+            var filteredProps = properties.Where(p => p.CanRead && p.GetIndexParameters().Length == 0).ToList();
+
+            if (filteredProps.Count > 0)
+            {
+                var propDict = filteredProps.ToDictionary(p => p.Name, p => p.GetValue(parameters));
+                for (int i = 0; i < Parameters.Count; i++)
+                {
+                    var parameter = Parameters[i];
+                    propDict.TryGetValue(parameter.Name, out var value);
+                    result[i] = parameter.FormatValue(value ?? parameter.DefaultValue);
+                }
+            }
         }
     }
 }

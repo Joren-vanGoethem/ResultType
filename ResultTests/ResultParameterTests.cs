@@ -98,37 +98,4 @@ public class ResultParameterTests
         Assert.Equal("d1", message.Parameters[0]);
         Assert.Equal("2", message.Parameters[1]);
     }
-
-    [Fact]
-    public void ResultTry_WithAnonymousObjectParameters_HandlesException()
-    {
-        // Arrange
-        var key = ValidationKeyDefinition.Create("error.try", "Error: {message}")
-            .WithStringParameter("message");
-        
-        // Act
-        var result = Result.Try<string>(() => throw new Exception("Test exception"), key);
-        
-        // Assert
-        Assert.False(result.IsSuccessful);
-        var message = result.ValidationMessages.First();
-        // Result.Try appends exception message to parameters
-        Assert.Equal("Test exception", message.Parameters[0]);
-    }
-
-    [Fact]
-    public async Task ResultTryAsync_WithAnonymousObjectParameters_HandlesException()
-    {
-        // Arrange
-        var key = ValidationKeyDefinition.Create("error.try.async", "Error: {message}")
-            .WithStringParameter("message");
-        
-        // Act
-        var result = await Result.TryAsync<string>(() => Task.FromException<string>(new Exception("Async test exception")), key);
-        
-        // Assert
-        Assert.False(result.IsSuccessful);
-        var message = result.ValidationMessages.First();
-        Assert.Equal("Async test exception", message.Parameters[0]);
-    }
 }

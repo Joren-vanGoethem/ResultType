@@ -54,7 +54,9 @@ public static class AsyncResultExtensions
             : Result.Create<TResult>(default, result.ValidationMessages);
     }
 
-    // Rename sync versions to avoid ambiguity
+    /// <summary>
+    /// Binds a Task&lt;Result&lt;TValue&gt;&gt; to a synchronous function that returns a Result.
+    /// </summary>
     public static async Task<Result<TResult>> BindSync<TValue, TResult>(
         this Task<Result<TValue>> resultTask,
         Func<TValue, Result<TResult>> binder)
@@ -65,15 +67,17 @@ public static class AsyncResultExtensions
             : Result.Create<TResult>(default, result.ValidationMessages);
     }
 
-    public static Task<Result<TResult>> BindSync<TValue, TResult>(
-        this Result<TValue> result,
-        Func<TValue, Result<TResult>> binder)
+    /// <summary>
+    /// Maps a Task&lt;Result&lt;TValue&gt;&gt; using a synchronous mapper function.
+    /// </summary>
+    public static async Task<Result<TResult>> MapSync<TValue, TResult>(
+        this Task<Result<TValue>> resultTask,
+        Func<TValue, TResult> mapper)
     {
-        var bindResult = result.IsSuccessful
-            ? binder(result.Value)
+        var result = await resultTask;
+        return result.IsSuccessful
+            ? Result.Ok(mapper(result.Value))
             : Result.Create<TResult>(default, result.ValidationMessages);
-
-        return Task.FromResult(bindResult);
     }
 
     public static async Task<TResult> MatchAsync<TValue, TResult>(

@@ -9,18 +9,31 @@ namespace JV.ResultUtilities
 {
     public class Result<TValue> : ResultType
     {
-        
-        private static readonly ValidationKeyDefinition UsernameInvalidKey = ValidationKeyDefinition
-            .Create("user.username.invalid")
-            .WithStringParameter("username")
-            .WithIntParameter("minLength");
+        private readonly TValue _value;
 
-        
-        public TValue Value { get; }
+        /// <summary>
+        /// Gets the value of a successful result.
+        /// Throws <see cref="InvalidOperationException"/> if the result is a failure.
+        /// </summary>
+        public TValue Value
+        {
+            get
+            {
+                if (IsFailure)
+                    throw new InvalidOperationException(
+                        "Cannot access Value on a failed result. Check IsSuccessful before accessing Value, or use Match/Map/Bind.");
+                return _value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the value without throwing on failure. For internal use only.
+        /// </summary>
+        internal TValue UnsafeValue => _value;
 
         private Result(TValue value, IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
         {
-            Value = value;
+            _value = value;
             ValidationMessages = validationMessages;
         }
 
@@ -32,25 +45,38 @@ namespace JV.ResultUtilities
 
         public Result<TValue> Merge(params Result[] results)
         {
-            return new Result<TValue>(Value, ValidationMessages.Concat(results.SelectMany(r => r.ValidationMessages)));
+            return new Result<TValue>(_value, ValidationMessages.Concat(results.SelectMany(r => r.ValidationMessages)));
         }
 
         public void Deconstruct(out bool isSuccessful, out IEnumerable<ValidationMessage.ValidationMessage> messages, out TValue value)
         {
             isSuccessful = IsSuccessful;
             messages = ValidationMessages;
-            value = Value;
+            value = _value;
         }
 
         public void Deconstruct(out Result validationResult, out TValue value)
         {
             validationResult = Result.Create(ValidationMessages);
-            value = Value;
+            value = _value;
         }
 
         public Result<TValue> Merge(Result<TValue> result)
         {
-            return new Result<TValue>(result.Value, ValidationMessages.Concat(result.ValidationMessages));
+            return new Result<TValue>(result._value, ValidationMessages.Concat(result.ValidationMessages));
+        }
+
+        /// <summary>
+        /// Casts a failed result to a different value type, forwarding all validation messages.
+        /// Throws <see cref="InvalidOperationException"/> if the result is successful.
+        /// </summary>
+        public Result<TResult> Cast<TResult>()
+        {
+            if (IsSuccessful)
+                throw new InvalidOperationException(
+                    "Cannot cast a successful result to a different type. Use Map instead.");
+
+            return Result.Create<TResult>(default!, ValidationMessages);
         }
 
         public static implicit operator Result<TValue>(Result result)
@@ -124,31 +150,24 @@ namespace JV.ResultUtilities
         public static Result Error(ValidationMessage.ValidationMessage validationMessage)
             => new Result([validationMessage]);
 
-        public static Result<T> Try<T>(Func<T> operation, ValidationKeyDefinition errorKey, params object[] parameters)
-        {
-            try
-            {
-                return Ok(operation());
-            }
-            catch (Exception ex)
-            {
-                return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
-            }
-        }
+        /// <summary>
+        /// Creates a failed Result&lt;T&gt; with the specified validation key and no parameters.
+        /// </summary>
+        public static Result<T> Error<T>(ValidationKeyDefinition validationKey)
+            => Create<T>(default!, new[] { ValidationMessage.ValidationMessage.Create(validationKey) });
 
-        public static async Task<Result<T>> TryAsync<T>(Func<Task<T>> operation, ValidationKeyDefinition errorKey,
-            params object[] parameters)
-        {
-            try
-            {
-                return Ok(await operation());
-            }
-            catch (Exception ex)
-            {
-                return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
-            }
-        }
-        
+        /// <summary>
+        /// Creates a failed Result&lt;T&gt; with the specified validation key and a single parameter.
+        /// </summary>
+        public static Result<T> Error<T>(ValidationKeyDefinition validationKey, object parameter)
+            => Create<T>(default!, new[] { ValidationMessage.ValidationMessage.Create(validationKey, parameter) });
+
+        /// <summary>
+        /// Creates a failed Result&lt;T&gt; with the specified validation key and parameters.
+        /// </summary>
+        public static Result<T> Error<T>(ValidationKeyDefinition validationKey, object[] parameters)
+            => Create<T>(default!, new[] { ValidationMessage.ValidationMessage.Create(validationKey, parameters) });
+
         public static implicit operator Result(ValidationMessage.ValidationMessage error) => Error(error);
     }
 }

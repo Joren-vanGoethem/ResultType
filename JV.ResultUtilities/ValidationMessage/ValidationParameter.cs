@@ -75,7 +75,7 @@ namespace JV.ResultUtilities.ValidationMessage
                 var addr = new MailAddress(email);
                 return addr.Address == email;
             }
-            catch
+            catch (FormatException _) // other exceptions will be thrown, we only want to catch FormatException
             {
                 return false;
             }

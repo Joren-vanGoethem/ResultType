@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
 
 namespace JV.ResultUtilities.Memoization;
 
@@ -10,7 +11,7 @@ namespace JV.ResultUtilities.Memoization;
 /// </summary>
 /// <typeparam name="TKey">The type of the cache key</typeparam>
 /// <typeparam name="TResult">The type of the function result</typeparam>
-internal class ExpiringMemoizedFunction<TKey, TResult> where TKey : notnull
+public class ExpiringMemoizedFunction<TKey, TResult> where TKey : notnull
 {
     private readonly ConcurrentDictionary<TKey, CacheEntry> _cache = new();
     private readonly Func<TKey, TResult> _function;
@@ -18,6 +19,8 @@ internal class ExpiringMemoizedFunction<TKey, TResult> where TKey : notnull
     private readonly TimeSpan? _expiration;
     private readonly object _cleanupLock = new();
     private DateTime _lastCleanup = DateTime.UtcNow;
+    private long _hitCount;
+    private long _missCount;
 
     public ExpiringMemoizedFunction(Func<TKey, TResult> function, int? maxCacheSize, TimeSpan? expiration)
     {
@@ -25,6 +28,31 @@ internal class ExpiringMemoizedFunction<TKey, TResult> where TKey : notnull
         _maxCacheSize = maxCacheSize;
         _expiration = expiration;
     }
+
+    /// <summary>
+    /// Gets the number of cache hits.
+    /// </summary>
+    public long HitCount => _hitCount;
+
+    /// <summary>
+    /// Gets the number of cache misses.
+    /// </summary>
+    public long MissCount => _missCount;
+
+    /// <summary>
+    /// Gets the total number of cache accesses.
+    /// </summary>
+    public long TotalAccesses => _hitCount + _missCount;
+
+    /// <summary>
+    /// Gets the cache hit ratio as a percentage.
+    /// </summary>
+    public double HitRatio => TotalAccesses == 0 ? 0 : (double)_hitCount / TotalAccesses * 100;
+
+    /// <summary>
+    /// Gets the number of items currently in the cache.
+    /// </summary>
+    public int CacheSize => _cache.Count;
 
     public TResult Invoke(TKey key)
     {
@@ -35,19 +63,21 @@ internal class ExpiringMemoizedFunction<TKey, TResult> where TKey : notnull
             if (!IsExpired(entry))
             {
                 entry.LastAccessed = DateTime.UtcNow;
+                Interlocked.Increment(ref _hitCount);
                 return entry.Value;
             }
-            
+
             _cache.TryRemove(key, out _);
         }
 
+        Interlocked.Increment(ref _missCount);
         var result = _function(key);
         var newEntry = new CacheEntry(result, DateTime.UtcNow);
-        
+
         _cache.AddOrUpdate(key, newEntry, (_, _) => newEntry);
-        
+
         EnforceSizeLimit();
-        
+
         return result;
     }
 

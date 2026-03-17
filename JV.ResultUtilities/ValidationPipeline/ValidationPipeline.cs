@@ -1,9 +1,6 @@
-﻿// ServiceCruiser is our proprietary software and all source code, databases, functionality, software, website designs, audio, video, text, photographs, graphics (collectively referred to as the ‘Content’) and all intellectual property rights, including all copyright, all trademarks, all logos and all know-how vested therein or related thereto  (collectively referred to as the ‘IPR’) are owned, licenced or controlled by ESAS 3Services NV (or any of its affiliates or subsidiaries), excluded is Content or IPR provided and owned by third parties. All Content and IPR are protected by copyright and trademark laws and various other intellectual property rights legislation and/or other European Union and/or Belgian legislation, including unfair commercial practices legislation.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using JV.ResultUtilities.Extensions;
 
@@ -13,6 +10,11 @@ public class ValidationPipeline<T>
 {
     private readonly List<Func<T, Result>> _syncValidators = new();
     private readonly List<Func<T, Task<Result>>> _asyncValidators = new();
+
+    /// <summary>
+    /// When true, validation stops on the first failure instead of collecting all errors.
+    /// </summary>
+    public bool ShortCircuit { get; set; }
 
     public ValidationPipeline<T> AddRule(Func<T, Result> validator)
     {
@@ -28,36 +30,80 @@ public class ValidationPipeline<T>
 
     public async Task<Result<T>> ValidateAsync(T value)
     {
-        // Process sync validators without async overhead
-        var syncResults = _syncValidators.Select(v => v(value));
-        
-        // Process async validators concurrently
-        var asyncTasks = _asyncValidators.Select(v => v(value));
-        var asyncResults = await Task.WhenAll(asyncTasks);
-        
-        // Merge all results
-        var allResults = syncResults.Concat(asyncResults);
-        var mergedResult = allResults.MergeResults();
+        var allMessages = new List<ValidationMessage.ValidationMessage>();
 
+        // Process sync validators
+        foreach (var validator in _syncValidators)
+        {
+            var result = validator(value);
+            if (result.IsFailure)
+            {
+                allMessages.AddRange(result.ValidationMessages);
+                if (ShortCircuit)
+                    return Result.Error(allMessages);
+            }
+        }
+
+        // Process async validators
+        if (ShortCircuit)
+        {
+            foreach (var validator in _asyncValidators)
+            {
+                var result = await validator(value);
+                if (result.IsFailure)
+                {
+                    allMessages.AddRange(result.ValidationMessages);
+                    return Result.Error(allMessages);
+                }
+            }
+        }
+        else
+        {
+            var asyncTasks = _asyncValidators.Select(v => v(value));
+            var asyncResults = await Task.WhenAll(asyncTasks);
+            foreach (var result in asyncResults)
+            {
+                if (result.IsFailure)
+                    allMessages.AddRange(result.ValidationMessages);
+            }
+        }
+
+        return allMessages.Count > 0
+            ? Result.Error(allMessages)
+            : Result.Ok(value);
+    }
+
+    /// <summary>
+    /// Validates synchronously. Throws <see cref="InvalidOperationException"/> if async rules have been added.
+    /// Use <see cref="ValidateAsync"/> when async rules are present.
+    /// </summary>
+    public Result<T> Validate(T value)
+    {
+        if (_asyncValidators.Count != 0)
+            throw new InvalidOperationException(
+                "Cannot use synchronous Validate() when async rules are registered. Use ValidateAsync() instead.");
+
+        if (ShortCircuit)
+        {
+            var allMessages = new List<ValidationMessage.ValidationMessage>();
+            foreach (var validator in _syncValidators)
+            {
+                var result = validator(value);
+                if (result.IsFailure)
+                {
+                    allMessages.AddRange(result.ValidationMessages);
+                    return Result.Error(allMessages);
+                }
+            }
+            return allMessages.Count > 0
+                ? Result.Error(allMessages)
+                : Result.Ok(value);
+        }
+
+        var results = _syncValidators.Select(v => v(value));
+        var mergedResult = results.MergeResults();
         return mergedResult.IsSuccessful
             ? Result.Ok(value)
             : Result.Error(mergedResult.ValidationMessages);
     }
-
-    public Result<T> Validate(T value)
-    {
-        // Pure sync execution when no async validators
-        if (_asyncValidators.Count == 0)
-        {
-            var results = _syncValidators.Select(v => v(value));
-            var mergedResult = results.MergeResults();
-            return mergedResult.IsSuccessful
-                ? Result.Ok(value)
-                : Result.Error(mergedResult.ValidationMessages);
-        }
-
-        // Fall back to async execution
-        return ValidateAsync(value).GetAwaiter().GetResult();
-    }
-
 }
