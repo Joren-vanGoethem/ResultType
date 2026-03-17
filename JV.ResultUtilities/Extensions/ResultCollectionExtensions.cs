@@ -73,55 +73,7 @@ public static class ResultCollectionExtensions
             ? Result.Create<IEnumerable<TResult>>(null, errors)
             : Result.Ok<IEnumerable<TResult>>(results);
     }
-
-    // Transform a collection keeping only successful results
-    public static Result<IEnumerable<TResult>> TraversePartial<T, TResult>(
-        this IEnumerable<T> source,
-        Func<T, Result<TResult>> transform)
-    {
-        var results = source
-            .Select(transform)
-            .Where(r => r.IsSuccessful)
-            .Select(r => r.Value);
-
-        return Result.Ok(results);
-    }
-
-    /// <summary>
-    /// Transforms items sequentially, keeping only successful results.
-    /// </summary>
-    public static async Task<Result<IEnumerable<TResult>>> TraversePartialAsync<T, TResult>(
-        this IEnumerable<T> source,
-        Func<T, Task<Result<TResult>>> transform)
-    {
-        var results = new List<TResult>();
-
-        foreach (var item in source)
-        {
-            var result = await transform(item);
-            if (result.IsSuccessful)
-                results.Add(result.Value);
-        }
-
-        return Result.Ok<IEnumerable<TResult>>(results);
-    }
-
-    /// <summary>
-    /// Transforms items in parallel, keeping only successful results.
-    /// </summary>
-    public static async Task<Result<IEnumerable<TResult>>> TraversePartialParallelAsync<T, TResult>(
-        this IEnumerable<T> source,
-        Func<T, Task<Result<TResult>>> transform)
-    {
-        var tasks = await Task.WhenAll(source.Select(transform));
-
-        var results = tasks
-            .Where(result => result.IsSuccessful)
-            .Select(r => r.Value);
-
-        return Result.Ok<IEnumerable<TResult>>(results);
-    }
-
+    
     /// <summary>
     /// Transforms items, returning successful values and collecting validation errors from failures.
     /// </summary>
@@ -157,6 +109,28 @@ public static class ResultCollectionExtensions
         foreach (var item in source)
         {
             var result = await transform(item);
+            if (result.IsSuccessful)
+                results.Add(result.Value);
+            else
+                errors.AddRange(result.ValidationMessages);
+        }
+
+        return (Result.Ok<IEnumerable<TResult>>(results), errors);
+    }
+    
+    /// <summary>
+    /// Transforms items asynchronously in parallel, returning successful values and collecting validation errors from failures.
+    /// </summary>
+    public static async Task<(Result<IEnumerable<TResult>> Results, IEnumerable<ValidationMessage.ValidationMessage> Errors)> TraversePartialWithErrorsParallelAsync<T, TResult>(
+        this IEnumerable<T> source,
+        Func<T, Task<Result<TResult>>> transform)
+    {
+        var tasks = await Task.WhenAll(source.Select(transform));
+        var results = new List<TResult>();
+        var errors = new List<ValidationMessage.ValidationMessage>();
+
+        foreach (var result in tasks)
+        {
             if (result.IsSuccessful)
                 results.Add(result.Value);
             else

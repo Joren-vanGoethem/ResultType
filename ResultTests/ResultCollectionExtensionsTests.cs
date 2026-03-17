@@ -116,81 +116,6 @@ namespace ResultTests
         }
 
         [Fact]
-        public void TraversePartial_WithMixedResults_ReturnsOnlySuccessful()
-        {
-            // Arrange
-            var source = new[] { 1, 2, 3, 4, 5, 6 };
-
-            // Act
-            var result = source.TraversePartial(x =>
-                x % 3 == 0
-                    ? Result.Error(ValidationErrorKey, x)
-                    : Result.Ok($"Item-{x}"));
-
-            // Assert
-            Assert.True(result.IsSuccessful);
-            Assert.Equal(4, result.Value.Count()); // All except 3 and 6
-            Assert.Contains("Item-1", result.Value);
-            Assert.Contains("Item-2", result.Value);
-            Assert.Contains("Item-4", result.Value);
-            Assert.Contains("Item-5", result.Value);
-        }
-
-        [Fact]
-        public void TraversePartial_WithAllFailures_ReturnsEmptySuccess()
-        {
-            // Arrange
-            var source = new[] { 1, 2, 3 };
-
-            // Act
-            var result = source.TraversePartial<int, string>(x => Result.Error(ValidationErrorKey, x));
-
-            // Assert
-            Assert.True(result.IsSuccessful);
-            Assert.Empty(result.Value);
-        }
-
-        [Fact]
-        public async Task TraversePartialAsync_WithMixedResults_ReturnsOnlySuccessful()
-        {
-            // Arrange
-            var source = new[] { "apple", "banana", "cherry", "date" };
-
-            // Act
-            var result = await source.TraversePartialAsync(async x =>
-            {
-                await Task.Delay(1);
-                return x.Length > 5
-                    ? Result.Error(ProcessingErrorKey, x)
-                    : Result.Ok(x.Length);
-            });
-
-            // Assert
-            Assert.True(result.IsSuccessful);
-            Assert.Equal(new[] { 5, 4 }, result.Value); // "apple" and "date"
-        }
-
-        [Fact]
-        public async Task TraversePartialAsync_WithAllFailures_ReturnsEmptySuccess()
-        {
-            // Arrange
-            var source = new[] { "verylongstring", "anotherlongstring" };
-
-            // Act
-            var result = await source.TraversePartialAsync(async x =>
-            {
-                await Task.Delay(1);
-                return x.Length > 5
-                    ? Result.Error(ProcessingErrorKey, x)
-                    : Result.Ok(x.Length);
-            });
-
-            // Assert
-            Assert.True(result.IsSuccessful);
-            Assert.Empty(result.Value);
-        }
-
-        [Fact]
         public void TraverseAll_RealWorldScenario_UserValidation()
         {
             // Arrange
@@ -208,26 +133,6 @@ namespace ResultTests
             // Assert
             Assert.True(result.IsFailure);
             Assert.Equal(2, result.ValidationMessages.Count()); // Jane and Bob should fail
-        }
-
-        [Fact]
-        public void TraversePartial_RealWorldScenario_UserValidation()
-        {
-            // Arrange
-            var userRequests = new[]
-            {
-                new { Name = "John", Age = 25, Email = "john@test.com" },
-                new { Name = "Jane", Age = 17, Email = "jane@test.com" }, // Under age
-                new { Name = "Bob", Age = 30, Email = "invalid-email" }, // Invalid email
-                new { Name = "Alice", Age = 28, Email = "alice@test.com" }
-            };
-
-            // Act
-            var result = userRequests.TraversePartial(ValidateUser);
-
-            // Assert
-            Assert.True(result.IsSuccessful);
-            Assert.Equal(2, result.Value.Count()); // Only John and Alice should succeed
         }
 
         private static Result<string> ValidateUser(dynamic request)

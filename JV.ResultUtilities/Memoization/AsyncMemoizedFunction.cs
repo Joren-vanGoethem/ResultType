@@ -10,7 +10,8 @@ namespace JV.ResultUtilities.Memoization;
 /// </summary>
 /// <typeparam name="TKey">The type of the cache key</typeparam>
 /// <typeparam name="TResult">The type of the function result</typeparam>
-public class AsyncMemoizedFunction<TKey, TResult> where TKey : notnull
+public class AsyncMemoizedFunction<TKey, TResult> : IDisposable 
+    where TKey : notnull
 {
     private readonly ConcurrentDictionary<TKey, TResult> _cache = new();
     private readonly Func<TKey, Task<TResult>> _function;
@@ -86,6 +87,7 @@ public class AsyncMemoizedFunction<TKey, TResult> where TKey : notnull
     public void ClearCache()
     {
         _cache.Clear();
+        _locks.Clear();
         Interlocked.Exchange(ref _hitCount, 0);
         Interlocked.Exchange(ref _missCount, 0);
     }
@@ -95,7 +97,7 @@ public class AsyncMemoizedFunction<TKey, TResult> where TKey : notnull
     /// </summary>
     public bool RemoveFromCache(TKey key)
     {
-        return _cache.TryRemove(key, out _);
+        return _locks.TryRemove(key, out var _) && _cache.TryRemove(key, out _);
     }
 
     /// <summary>
@@ -105,4 +107,11 @@ public class AsyncMemoizedFunction<TKey, TResult> where TKey : notnull
     {
         return _cache.ContainsKey(key);
     }
+
+    public void Dispose()
+    {
+        _cache.Clear();
+        _locks.Clear();
+        Interlocked.Exchange(ref _hitCount, 0);
+        Interlocked.Exchange(ref _missCount, 0);    }
 }

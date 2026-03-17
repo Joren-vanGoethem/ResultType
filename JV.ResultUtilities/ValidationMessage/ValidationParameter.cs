@@ -51,7 +51,7 @@ namespace JV.ResultUtilities.ValidationMessage
                 ParameterType.DateOnly => value is DateOnly || DateOnly.TryParse(value.ToString(), out _),
                 ParameterType.Boolean => value is bool || bool.TryParse(value.ToString(), out _),
                 ParameterType.Guid => value is Guid || Guid.TryParse(value.ToString(), out _),
-                ParameterType.Enum => value is Enum || (value is string s && !string.IsNullOrWhiteSpace(s)),
+                ParameterType.Enum => value is Enum,
                 ParameterType.Uri => value is Uri || Uri.TryCreate(value.ToString(), UriKind.Absolute, out _),
                 ParameterType.TimeSpan => value is TimeSpan || TimeSpan.TryParse(value.ToString(), out _),
                 ParameterType.Email => value is string s && IsValidEmail(s),
@@ -75,7 +75,7 @@ namespace JV.ResultUtilities.ValidationMessage
                 var addr = new MailAddress(email);
                 return addr.Address == email;
             }
-            catch
+            catch (FormatException _) // other exceptions will be thrown, we only want to catch FormatException
             {
                 return false;
             }

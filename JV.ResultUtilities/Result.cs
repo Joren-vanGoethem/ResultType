@@ -165,80 +165,8 @@ namespace JV.ResultUtilities
         /// <summary>
         /// Creates a failed Result&lt;T&gt; with the specified validation key and parameters.
         /// </summary>
-        public static Result<T> Error<T>(ValidationKeyDefinition validationKey, params object[] parameters)
+        public static Result<T> Error<T>(ValidationKeyDefinition validationKey, object[] parameters)
             => Create<T>(default!, new[] { ValidationMessage.ValidationMessage.Create(validationKey, parameters) });
-
-        /// <summary>
-        /// Wraps a synchronous operation in a try/catch, returning a Result with the value on success
-        /// or a failed Result with the error key and parameters on failure.
-        /// The caught exception's Message is appended to the parameters array.
-        /// </summary>
-        public static Result<T> Try<T>(Func<T> operation, ValidationKeyDefinition errorKey, params object[] parameters)
-        {
-            try
-            {
-                return Ok(operation());
-            }
-            catch (Exception ex)
-            {
-                return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Wraps a synchronous void operation in a try/catch, returning a Result on success
-        /// or a failed Result with the error key and parameters on failure.
-        /// The caught exception's Message is appended to the parameters array.
-        /// </summary>
-        public static Result Try(Action operation, ValidationKeyDefinition errorKey, params object[] parameters)
-        {
-            try
-            {
-                operation();
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Wraps an asynchronous operation in a try/catch, returning a Result with the value on success
-        /// or a failed Result with the error key and parameters on failure.
-        /// The caught exception's Message is appended to the parameters array.
-        /// </summary>
-        public static async Task<Result<T>> TryAsync<T>(Func<Task<T>> operation, ValidationKeyDefinition errorKey,
-            params object[] parameters)
-        {
-            try
-            {
-                return Ok(await operation());
-            }
-            catch (Exception ex)
-            {
-                return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Wraps an asynchronous void operation in a try/catch, returning a Result on success
-        /// or a failed Result with the error key and parameters on failure.
-        /// The caught exception's Message is appended to the parameters array.
-        /// </summary>
-        public static async Task<Result> TryAsync(Func<Task> operation, ValidationKeyDefinition errorKey,
-            params object[] parameters)
-        {
-            try
-            {
-                await operation();
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return Error(errorKey, parameters.Concat(new[] { ex.Message }).ToArray());
-            }
-        }
 
         public static implicit operator Result(ValidationMessage.ValidationMessage error) => Error(error);
     }

@@ -29,6 +29,9 @@ namespace JV.ResultUtilities.ValidationMessage
         /// </summary>
         public ValidationKeyDefinition WithFieldName(string fieldName)
         {
+            if (string.IsNullOrWhiteSpace(fieldName))
+                throw new ArgumentException($"'{nameof(fieldName)}' cannot be null or whitespace.", nameof(fieldName));
+            
             return new ValidationKeyDefinition(Key, TranslationKey, Parameters, fieldName);
         }
 
