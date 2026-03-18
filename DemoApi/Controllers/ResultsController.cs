@@ -23,7 +23,6 @@ public class ResultsController : ControllerBase
         // if the result was succesful you get a 200 OK
         return Ok();
     }
-    
 }
 
 public record CreateUserRequest (string Name, string Email);

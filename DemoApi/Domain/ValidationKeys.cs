@@ -11,6 +11,9 @@ public static class ValidationKeys
         public static readonly ValidationKeyDefinition NameTooLong = ValidationKeyDefinition.Create("User.NameTooLong")
             .WithStringParameter("Name")
             .WithIntParameter("MaxLength");
+
+        public static readonly ValidationKeyDefinition NameCannotBeEmmpty = ValidationKeyDefinition
+            .Create("User.NameCannotBeEmpty");
         
         public static readonly ValidationKeyDefinition EmailInvalid = ValidationKeyDefinition.Create("User.EmailInvalid")
         // do not use email parameter here, because we are expecting an INVALID email,

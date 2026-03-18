@@ -21,9 +21,20 @@ Content-Type: application/json
 Accept-Language: en
 
 {
-  "name": "",
+  "name": " ",
   "email": "john.doe@example.com"
 }
+
+### Create User - Empty name and invalid email (EN)
+POST {{host}}/results
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "name": " ",
+  "email": "not-an-email"
+}
+
 
 ### Create User - Invalid email (EN)
 POST {{host}}/results
