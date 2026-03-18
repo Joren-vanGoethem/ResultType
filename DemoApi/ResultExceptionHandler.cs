@@ -33,7 +33,14 @@ public sealed class ResultExceptionHandler(
             Type = StatusCodeTypeUri(statusCode),
             Title = ReasonPhrases.GetReasonPhrase(statusCode),
             Detail = exception.Message, // dangerous in production
+            Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}",
         };
+        
+        var traceId = Activity.Current?.TraceId.ToString();
+        problemDetails.Extensions["traceId"] =
+            string.IsNullOrWhiteSpace(traceId) ? httpContext.TraceIdentifier : traceId;
+        
+        problemDetails.Extensions["requestId"] = httpContext.TraceIdentifier;
 
         if (exception is ResultException resultException)
         {
@@ -46,10 +53,6 @@ public sealed class ResultExceptionHandler(
             
             // ; as delimited because someone might put a , in a translation and then the frontend cannot properly split them
         }
-
-        var traceId = Activity.Current?.TraceId.ToString();
-        problemDetails.Extensions["traceId"] =
-            string.IsNullOrWhiteSpace(traceId) ? httpContext.TraceIdentifier : traceId;
 
         // In .NET 10, returning true here also suppresses duplicate middleware diagnostics by default.
         return await problemDetailsService.TryWriteAsync(
