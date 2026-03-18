@@ -26,6 +26,10 @@ public class User
                     MaxLength = 100
                 })
             )
+        .AddRule(u => string.IsNullOrWhiteSpace(u.Name)
+            ? Result.Error(ValidationKeys.User.NameCannotBeEmmpty)
+            : Result.Ok()
+            )
         .AddRule(u => u.Email.Contains("@") // yes this is a stupid check but you get the idea
             ? Result.Ok()
             : Result.Error(ValidationKeys.User.EmailInvalid, u.Email));

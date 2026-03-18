@@ -41,7 +41,7 @@ public class Startup
     // Register the translator, just a basic IStringLocalizer wrapper with culture fallback to our default culture
     services.AddSingleton<ITranslator, Translator>();
     
-    // custom exception handler for transformint a ResultException into ProblemDetails
+    // custom exception handler for transforming a ResultException into ProblemDetails
     services.AddExceptionHandler<ResultExceptionHandler>();
     
     services.AddControllers();

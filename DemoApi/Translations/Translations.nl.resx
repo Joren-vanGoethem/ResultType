@@ -24,4 +24,7 @@
     <data name="User.EmailInvalid" xml:space="preserve">
         <value>email {0} is niet geldig</value>
     </data>
+    <data name="User.NameCannotBeEmpty" xml:space="preserve">
+        <value>naam mag niet leeg zijn</value>
+    </data>
 </root>

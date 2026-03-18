@@ -24,4 +24,7 @@
     <data name="User.EmailInvalid" xml:space="preserve">
         <value>email {0} is invalid</value>
     </data>
+    <data name="User.NameCannotBeEmpty" xml:space="preserve">
+        <value>name cannot be empty</value>
+    </data>
 </root>
