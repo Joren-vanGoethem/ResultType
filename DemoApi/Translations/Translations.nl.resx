@@ -27,4 +27,19 @@
     <data name="User.NameCannotBeEmpty" xml:space="preserve">
         <value>naam mag niet leeg zijn</value>
     </data>
+    <data name="Validation.NotNull" xml:space="preserve">
+        <value>{0} mag niet null zijn</value>
+    </data>
+    <data name="Validation.NotEmpty" xml:space="preserve">
+        <value>{0} mag niet leeg zijn</value>
+    </data>
+    <data name="Validation.MaxLength" xml:space="preserve">
+        <value>{0} mag niet meer dan {1} tekens bevatten</value>
+    </data>
+    <data name="Validation.MinLength" xml:space="preserve">
+        <value>{0} moet minimaal {1} tekens bevatten</value>
+    </data>
+    <data name="Validation.Predicate" xml:space="preserve">
+        <value>{0} is niet geldig</value>
+    </data>
 </root>
