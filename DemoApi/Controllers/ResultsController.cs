@@ -1,5 +1,3 @@
-using DemoApi.Domain;
-using JV.ResultUtilities.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoApi.Controllers;
@@ -12,17 +10,14 @@ public class ResultsController : ControllerBase
     [EndpointName("CreateUser")]
     public async Task<ActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
     {
-        var (result, user) = Domain.User.Create(request.Name, request.Email);
-        
-        // this will get caught by the resultException handler,
-        // problemdetails will be created with translations of the validation keys
-        result.ThrowIfFailure(); 
-        
+        // Request is automatically validated by CreateUserRequestValidator before reaching this method.
+        // If validation fails, the ValidateModelFilter throws a ResultException which is caught by
+        // ResultExceptionHandler and returned as a translated ProblemDetails response.
+
         // save user with dbcontext etc.
-        
-        // if the result was succesful you get a 200 OK
+
         return Ok();
     }
 }
 
-public record CreateUserRequest (string Name, string Email);
+public record CreateUserRequest(string Name, string Email);

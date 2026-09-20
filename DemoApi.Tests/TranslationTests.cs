@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using DemoApi.Domain;
+using JV.ResultUtilities.FluentValidation;
 using JV.ResultUtilities.ValidationMessage;
 
 namespace DemoApi.Tests;
@@ -124,6 +125,7 @@ public class TranslationTests
   private HashSet<string> GetValidationKeysFromClass()
   {
     return GetValidationKeyDefinitions(typeof(ValidationKeys))
+      .Concat(GetValidationKeyDefinitions(typeof(BuiltInValidationKeys)))
       .Select(def => def.Key)
       .ToHashSet();
   }

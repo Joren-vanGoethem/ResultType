@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using DemoApi.Translations;
+using DemoApi.Validation;
+using JV.ResultUtilities.FluentValidation;
 using Microsoft.AspNetCore.Http.Features;
 using Tenant.Api.Translations;
 
@@ -45,8 +47,15 @@ public class Startup
     
     // custom exception handler for transforming a ResultException into ProblemDetails
     services.AddExceptionHandler<ResultExceptionHandler>();
-    
-    services.AddControllers();
+
+    // register validators for auto-validation via the filter
+    services.AddSingleton<IValidator, CreateUserRequestValidator>();
+    services.AddSingleton<ValidateModelFilter>();
+
+    services.AddControllers(options =>
+    {
+      options.Filters.AddService<ValidateModelFilter>();
+    });
   }
 
   /// <summary>
