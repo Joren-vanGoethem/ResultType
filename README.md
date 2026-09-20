@@ -1,5 +1,12 @@
 # JV.ResultUtilities
 
+## Packages
+
+| Package | Purpose |
+|---|---|
+| `JV.ResultUtilities` | The Result type, validation keys and messages, validation pipeline and `AbstractValidator<T>` |
+| `JV.ResultUtilities.AspNetCore` | `ResultException` → RFC 9457 ProblemDetails handler with per-key HTTP status, structured errors, translation seam and request validation filter |
+
 ## Overview
 
 This package provides a robust Result type implementation for handling success and failure states in your application.
@@ -37,4 +44,5 @@ validation messages).
   - [Validation Messages](Features-Guide.md#validation-messages) (Keys, Parameters, FieldName, Metadata, HttpStatusCode, NamedParameters, CreateLenient, RawParameters, HasError)
   - [Validation Pipeline](Features-Guide.md#validation-pipeline) (Sync, Async, ShortCircuit)
   - [Exception Bridging](Features-Guide.md#exception-bridging)
+  - [ASP.NET Core package](Features-Guide.md#aspnet-core-jvresultutilitiesaspnetcore) — ProblemDetails handler, per-key HTTP status, request validation
   - [Async Pipelines](Features-Guide.md#async-pipelines)

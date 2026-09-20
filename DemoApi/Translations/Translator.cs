@@ -1,4 +1,6 @@
 using System.Globalization;
+using JV.ResultUtilities.AspNetCore;
+using JV.ResultUtilities.ValidationMessage;
 using Microsoft.Extensions.Localization;
 using Tenant.Api.Translations;
 
@@ -49,4 +51,14 @@ public class Translator : ITranslator
 
         return result.Value;
     }
+}
+
+/// <summary>
+/// Adapts the resx-backed <see cref="ITranslator"/> to the package's <see cref="IResultMessageTranslator"/>:
+/// the translation key is the resx key, the formatted parameters fill its {0}… placeholders.
+/// </summary>
+public sealed class ResxResultMessageTranslator(ITranslator translator) : IResultMessageTranslator
+{
+    public string Translate(ValidationMessage message)
+        => translator.Translate(message.TranslationKey, message.Parameters.ToArray<object>());
 }

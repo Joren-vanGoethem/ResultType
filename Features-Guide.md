@@ -331,6 +331,18 @@ return CreateUser(validationResult.Value);
 
 ---
 
+### Result.Fail&lt;T&gt;
+
+The implicit `Result` → `Result<T>` conversion only works for failures and throws `NotSupportedException`
+at runtime when the source succeeded. `Result.Fail<T>(failure)` is the explicit spelling: the intent is
+visible at the call site and it throws a clear `InvalidOperationException` on misuse.
+
+```c#
+var check = ValidateName(name);
+if (check.IsFailure)
+    return Result.Fail<User>(check);   // instead of the implicit `return check;`
+```
+
 ## Implicit Conversions
 
 The library provides implicit operators for concise code:
@@ -713,6 +725,27 @@ There is one exception type, `ResultException`, for both `Result` and `Result<T>
 **Use exception bridging when:** you need to interop with code that expects exceptions (middleware, third-party libraries, top-level error handlers). Prefer staying in the Result world for your own code.
 
 ---
+
+## ASP.NET Core (JV.ResultUtilities.AspNetCore)
+
+A separate package turns `ThrowIfFailure()` into an HTTP answer:
+
+```c#
+builder.Services.AddResultProblemDetails<ResxResultMessageTranslator>();  // handler + ProblemDetails
+builder.Services.AddResultValidation(typeof(Program).Assembly);            // AbstractValidator<T> as a filter
+app.UseExceptionHandler();
+```
+
+- `WithHttpStatus(404)` on a key makes every failure carrying it a 404; `options.MapStatus(key, code)`
+  does the same for keys you do not own. Mixed statuses fall back to the default (400) unless a 5xx is
+  among them.
+- The body is RFC 9457 `application/problem+json` with `detail` (translated messages joined), `errors`
+  (field → messages, ASP.NET's own shape) and `validation` (key, field, message, named parameters).
+- Only `ResultException` is handled; other exceptions stay with the framework's default handling, so no
+  exception message ever leaks through this package.
+- `IResultMessageTranslator` is the one interface you implement to translate keys.
+
+See the package README for the full body and options.
 
 ## Async Pipelines
 
