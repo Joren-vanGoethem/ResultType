@@ -202,6 +202,11 @@ Result<Order> order = await CreateOrderAsync(request)
 
 ## Merging Results
 
+`ValidationMessages` on every result is an `IReadOnlyList<ValidationMessage>`: whatever sequence a
+factory or `Merge` receives is copied once, so checking `IsSuccessful` repeatedly, indexing, or calling
+`HasError` never re-enumerates a lazy source, and a caller-owned `List<T>` mutated afterwards does not
+change a result that already exists.
+
 Combine multiple independent results into one.
 
 ```c#
@@ -445,6 +450,80 @@ var fieldName = message.KeyDefinition.FieldName; // "email"
 
 **Use FieldName when:** your API returns validation errors that a frontend needs to map to specific form fields.
 
+### Key Metadata
+
+Attach arbitrary, immutable metadata to a key so a consuming layer can read semantics the core library
+does not know about — the classic case is the HTTP status an API should answer with:
+
+```c#
+private static readonly ValidationKeyDefinition NotFoundKey =
+    ValidationKeyDefinition.Create("user.not.found")
+    .WithGuidParameter("id")
+    .WithMetadata("http.status", 404);
+
+// Later, at the API boundary:
+if (message.KeyDefinition.TryGetMetadata<int>("http.status", out var status))
+    response.StatusCode = status;
+```
+
+`WithMetadata` returns a copy (like `WithFieldName`), replaces an existing entry with the same name, and
+survives further `With…` calls in either order. The library itself never reads `Metadata`.
+
+**Use Metadata when:** the meaning of a key (status code, severity, category) should live next to the key
+instead of in a second registry that has to be kept in sync.
+
+### Named Parameters
+
+`ValidationMessage.Parameters` is the formatted `string[]` in declaration order. `NamedParameters` exposes
+the same values, raw and keyed by the parameter names declared on the key, with defaults applied:
+
+```c#
+var key = ValidationKeyDefinition.Create("job.interval.out.of.range")
+    .WithIntParameter("value")
+    .WithIntParameter("minimum")
+    .WithIntParameter("maximum", 3600);
+
+var message = ValidationMessage.Create(key, new { minimum = 10, value = 7 });
+
+message.Parameters;                  // ["7", "10", "3600"]
+message.NamedParameters["value"];    // 7   (int, not "7")
+message.NamedParameters["maximum"];  // 3600 (the default)
+```
+
+`ValidationKeyDefinition.ResolveParameterValues(object?)` is the public building block: it returns one
+raw value per declared parameter for any accepted input shape, and `FormatParameters` is defined as
+"resolve, then format", so the two can never disagree about which value fills which slot.
+
+For a lenient message (`CreateLenient`) names are matched by position and any surplus value is keyed by
+its index (`"2"`).
+
+**Use NamedParameters when:** serialising errors for a client — `parameters.maximum` beats guessing which
+`{n}` placeholder a value was.
+
+### Matching on Keys
+
+`HasError`, `HasErrorWithPrefix` and `MessagesFor` are defined on `ResultType`, so they work on both
+`Result` and `Result<T>`:
+
+```c#
+var result = await service.DeleteAsync(id);
+
+if (result.HasError(ValidationKeys.User.NotFound))   // by definition (compares the Key string)
+    return NotFound();
+if (result.HasError("User.Locked"))                  // by key string
+    return Conflict();
+if (result.HasErrorWithPrefix("User."))              // any key of that entity
+    ...
+
+foreach (var m in result.MessagesFor(ValidationKeys.User.NotFound))
+    logger.LogInformation("missing user {Id}", m.NamedParameters["id"]);
+
+result.ThrowIfFailure();
+```
+
+Two `ValidationKeyDefinition` instances created for the same key string match each other, so a
+definition re-created in a test matches one declared in production code.
+
 ### Lenient Creation
 
 `CreateLenient` bypasses parameter type validation. Parameters are simply converted via `ToString()`.
@@ -593,26 +672,28 @@ Bridge between Result-based code and exception-based code:
 ```c#
 // Throw if a result is a failure
 Result<User> user = GetUser(userId);
-user.ThrowIfFailure(); // throws ResultException<User> with all validation messages
+user.ThrowIfFailure(); // throws ResultException carrying all validation messages
 
 // ResultException sets Exception.Message with a summary of all errors
 try
 {
     GetUser(userId).ThrowIfFailure();
 }
-catch (ResultException<User> ex)
+catch (ResultException ex)
 {
     // ex.Message contains: "ValidationKey: user.not.found Parameters: user-123"
-    // ex.ValidationMessages contains the original validation messages
-    logger.LogError(ex, "Failed to get user");
+    // ex.ValidationMessages is the materialised list of original validation messages
+    // ex.Keys is ["user.not.found"] — handy for structured logging without re-deriving it
+    logger.LogWarning("Request rejected: {Keys}", ex.Keys);
 }
 
 // Construct exceptions directly
-var exception = new ResultException(result);           // from non-generic Result
-var exception = new ResultException<User>(userResult); // from Result<User>
-var exception = new ResultException(validationMessage);// from a single message
-var exception = new ResultException(validationKey);    // from a key definition
+var exception = new ResultException(result);            // from a Result
+var exception = new ResultException(validationMessage); // from a single message
+var exception = new ResultException(validationKey);     // from a key definition
 ```
+
+There is one exception type, `ResultException`, for both `Result` and `Result<T>`; `ThrowIfFailure<T>()` throws it with the failed result's messages and drops the (absent) value.
 
 **Use exception bridging when:** you need to interop with code that expects exceptions (middleware, third-party libraries, top-level error handlers). Prefer staying in the Result world for your own code.
 

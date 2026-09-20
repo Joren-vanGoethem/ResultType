@@ -176,12 +176,11 @@ The system provides several extension methods for working with results:
 
 - `Cast<TResult>()`: Re-type a failed `Result<T>` to `Result<TResult>`, forwarding all validation messages. Throws `InvalidOperationException` on successful results — use `Map` instead.
 
-### Memoization Extensions
+### Key Matching
 
-- `Memoize()`: Cache function results (supports 1-3 parameter overloads)
-- `MemoizeAsync()`: Cache async function results with per-key locking
-- `MemoizeResult()`: Cache functions that return `Result<T>`
-- `MemoizeResultWithKey()`: Cache `Result<T>` functions using a custom key selector
+- `HasError(key)` / `HasError("Entity.Error")`: failed and carries that key
+- `HasErrorWithPrefix("Entity.")`: failed and any key starts with the prefix
+- `MessagesFor(key)`: the messages carrying that key
 
 ### Creating Typed Error Results
 

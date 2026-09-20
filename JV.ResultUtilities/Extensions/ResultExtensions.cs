@@ -20,6 +20,51 @@ namespace JV.ResultUtilities.Extensions
             if (result.IsFailure)
                 throw new ResultException(result.ValidationMessages);
         }
+
+        /// <summary>
+        /// True when the result failed and at least one of its messages carries <paramref name="key"/>.
+        /// Compares on <see cref="ValidationKeyDefinition.Key"/>, so two definitions created for the same
+        /// key string match even when they are different instances. Defined on <see cref="ResultType"/>
+        /// so one overload serves both <see cref="Result"/> and <see cref="Result{TValue}"/>.
+        /// </summary>
+        public static bool HasError(this ResultType result, ValidationKeyDefinition key)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            return result.HasError(key.Key);
+        }
+
+        /// <summary>
+        /// True when the result failed and at least one of its messages has exactly this key string.
+        /// </summary>
+        public static bool HasError(this ResultType result, string key)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            return result.IsFailure && result.ValidationMessages.Any(m => KeyOf(m) == key);
+        }
+
+        /// <summary>
+        /// True when the result failed and at least one message key starts with <paramref name="keyPrefix"/>,
+        /// e.g. <c>"Backtest."</c> to ask "did anything about the backtest fail". Ordinal comparison.
+        /// </summary>
+        public static bool HasErrorWithPrefix(this ResultType result, string keyPrefix)
+        {
+            if (keyPrefix == null) throw new ArgumentNullException(nameof(keyPrefix));
+            return result.IsFailure &&
+                   result.ValidationMessages.Any(m => KeyOf(m).StartsWith(keyPrefix, StringComparison.Ordinal));
+        }
+
+        /// <summary>
+        /// The messages of this result that carry <paramref name="key"/>; empty on success or when none match.
+        /// </summary>
+        public static IEnumerable<ValidationMessage.ValidationMessage> MessagesFor(this ResultType result,
+            ValidationKeyDefinition key)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            return result.ValidationMessages.Where(m => KeyOf(m) == key.Key);
+        }
+
+        private static string KeyOf(ValidationMessage.ValidationMessage message)
+            => message.KeyDefinition?.Key ?? message.TranslationKey;
         
         /// <summary>
         /// Combines multiple results into one result
