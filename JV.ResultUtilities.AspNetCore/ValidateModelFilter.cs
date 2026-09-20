@@ -1,9 +1,15 @@
 using JV.ResultUtilities.Exceptions;
-using JV.ResultUtilities.FluentValidation;
+using JV.ResultUtilities.Validation;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace DemoApi.Validation;
+namespace JV.ResultUtilities.AspNetCore;
 
+/// <summary>
+/// Runs the registered <see cref="IValidator"/> for each action argument whose type has one, before
+/// the action executes. A failure throws <see cref="ResultException"/>, which
+/// <see cref="ResultExceptionHandler"/> turns into the same problem body a domain failure gets — so
+/// request-shape errors and business-rule errors are one shape on the wire, and both are translated.
+/// </summary>
 public sealed class ValidateModelFilter(IEnumerable<IValidator> validators) : IAsyncActionFilter
 {
     private readonly Dictionary<Type, IValidator> _validatorMap =

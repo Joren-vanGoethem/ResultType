@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using JV.ResultUtilities.ValidationMessage;
 using JV.ResultUtilities.ValidationPipeline;
 
-namespace JV.ResultUtilities.FluentValidation;
+namespace JV.ResultUtilities.Validation;
 
 public class RuleBuilder<T, TProperty>
 {

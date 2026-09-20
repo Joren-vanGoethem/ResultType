@@ -331,6 +331,18 @@ return CreateUser(validationResult.Value);
 
 ---
 
+### Result.Fail&lt;T&gt;
+
+The implicit `Result` → `Result<T>` conversion only works for failures and throws `NotSupportedException`
+at runtime when the source succeeded. `Result.Fail<T>(failure)` is the explicit spelling: the intent is
+visible at the call site and it throws a clear `InvalidOperationException` on misuse.
+
+```c#
+var check = ValidateName(name);
+if (check.IsFailure)
+    return Result.Fail<User>(check);   // instead of the implicit `return check;`
+```
+
 ## Implicit Conversions
 
 The library provides implicit operators for concise code:
@@ -453,21 +465,36 @@ var fieldName = message.KeyDefinition.FieldName; // "email"
 ### Key Metadata
 
 Attach arbitrary, immutable metadata to a key so a consuming layer can read semantics the core library
-does not know about — the classic case is the HTTP status an API should answer with:
+does not interpret. The one entry the library *does* define a typed helper for is the HTTP status an API
+should answer with — `System.Net.HttpStatusCode` is a base-library type, so the domain can declare it
+without a web dependency:
 
 ```c#
 private static readonly ValidationKeyDefinition NotFoundKey =
     ValidationKeyDefinition.Create("user.not.found")
     .WithGuidParameter("id")
-    .WithMetadata("http.status", 404);
+    .WithHttpStatusCode(HttpStatusCode.NotFound);
 
-// Later, at the API boundary:
-if (message.KeyDefinition.TryGetMetadata<int>("http.status", out var status))
-    response.StatusCode = status;
+// At the API boundary — on the key, a message, or the whole result:
+if (message.KeyDefinition.TryGetHttpStatusCode(out var status)) ...
+if (result.TryGetHttpStatusCode(out var status))      // highest status across its messages
+    response.StatusCode = (int)status;                 // 409 outranks 404, 5xx outranks 4xx
+// else fall back to 400
 ```
 
-`WithMetadata` returns a copy (like `WithFieldName`), replaces an existing entry with the same name, and
-survives further `With…` calls in either order. The library itself never reads `Metadata`.
+Anything else goes through the general bag:
+
+```c#
+var key = ValidationKeyDefinition.Create("user.email.taken")
+    .WithMetadata("severity", "warning");
+
+key.TryGetMetadata<string>("severity", out var severity);  // "warning"
+```
+
+`WithMetadata` / `WithHttpStatusCode` return a copy (like `WithFieldName`), replace an existing entry with
+the same name, and survive further `With…` calls in either order. `ValidationKeyMetadata.HttpStatusCode`
+is the entry name the typed helpers use, so a value stored by hand under it (an `int` or an
+`HttpStatusCode`) is read back the same way.
 
 **Use Metadata when:** the meaning of a key (status code, severity, category) should live next to the key
 instead of in a second registry that has to be kept in sync.
@@ -698,6 +725,27 @@ There is one exception type, `ResultException`, for both `Result` and `Result<T>
 **Use exception bridging when:** you need to interop with code that expects exceptions (middleware, third-party libraries, top-level error handlers). Prefer staying in the Result world for your own code.
 
 ---
+
+## ASP.NET Core (JV.ResultUtilities.AspNetCore)
+
+A separate package turns `ThrowIfFailure()` into an HTTP answer:
+
+```c#
+builder.Services.AddResultProblemDetails<ResxResultMessageTranslator>();  // handler + ProblemDetails
+builder.Services.AddResultValidation(typeof(Program).Assembly);            // AbstractValidator<T> as a filter
+app.UseExceptionHandler();
+```
+
+- `WithHttpStatus(404)` on a key makes every failure carrying it a 404; `options.MapStatus(key, code)`
+  does the same for keys you do not own. Mixed statuses fall back to the default (400) unless a 5xx is
+  among them.
+- The body is RFC 9457 `application/problem+json` with `detail` (translated messages joined), `errors`
+  (field → messages, ASP.NET's own shape) and `validation` (key, field, message, named parameters).
+- Only `ResultException` is handled; other exceptions stay with the framework's default handling, so no
+  exception message ever leaks through this package.
+- `IResultMessageTranslator` is the one interface you implement to translate keys.
+
+See the package README for the full body and options.
 
 ## Async Pipelines
 

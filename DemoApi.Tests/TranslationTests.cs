@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using DemoApi.Domain;
-using JV.ResultUtilities.FluentValidation;
+using JV.ResultUtilities.Validation;
 using JV.ResultUtilities.ValidationMessage;
 
 namespace DemoApi.Tests;

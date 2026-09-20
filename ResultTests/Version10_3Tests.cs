@@ -349,3 +349,83 @@ public class ResultExceptionKeysTests
         Assert.Equal(1, enumerations);
     }
 }
+
+public class HttpStatusCodeMetadataTests
+{
+    private static readonly ValidationKeyDefinition NotFound = ValidationKeyDefinition
+        .Create("User.NotFound").WithGuidParameter("id").WithHttpStatusCode(System.Net.HttpStatusCode.NotFound);
+
+    private static readonly ValidationKeyDefinition Conflict = ValidationKeyDefinition
+        .Create("User.EmailTaken").WithHttpStatusCode(System.Net.HttpStatusCode.Conflict);
+
+    private static readonly ValidationKeyDefinition Plain = ValidationKeyDefinition
+        .Create("User.NameRequired");
+
+    [Fact]
+    public void WithHttpStatusCode_StoresUnderTheWellKnownMetadataName()
+    {
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, NotFound.Metadata[ValidationKeyMetadata.HttpStatusCode]);
+    }
+
+    [Fact]
+    public void TryGetHttpStatusCode_OnKey_ReadsItBack()
+    {
+        Assert.True(NotFound.TryGetHttpStatusCode(out var code));
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, code);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, NotFound.GetHttpStatusCode());
+    }
+
+    [Fact]
+    public void TryGetHttpStatusCode_FalseWhenKeyDeclaresNone()
+    {
+        Assert.False(Plain.TryGetHttpStatusCode(out _));
+        Assert.Null(Plain.GetHttpStatusCode());
+    }
+
+    [Fact]
+    public void TryGetHttpStatusCode_AcceptsAnIntStoredByHand()
+    {
+        var key = Plain.WithMetadata(ValidationKeyMetadata.HttpStatusCode, 422);
+
+        Assert.True(key.TryGetHttpStatusCode(out var code));
+        Assert.Equal(System.Net.HttpStatusCode.UnprocessableEntity, code);
+    }
+
+    [Fact]
+    public void TryGetHttpStatusCode_OnMessage_DelegatesToItsKey()
+    {
+        var message = ValidationMessage.Create(NotFound, Guid.NewGuid());
+
+        Assert.True(message.TryGetHttpStatusCode(out var code));
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, code);
+    }
+
+    [Fact]
+    public void TryGetHttpStatusCode_OnResult_PicksTheHighestDeclaredStatus()
+    {
+        var result = Result.Create([
+            ValidationMessage.Create(Plain),
+            ValidationMessage.Create(NotFound, Guid.NewGuid()),
+            ValidationMessage.Create(Conflict),
+        ]);
+
+        Assert.True(result.TryGetHttpStatusCode(out var code));
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, code);
+    }
+
+    [Fact]
+    public void TryGetHttpStatusCode_OnResult_FalseOnSuccessOrWhenNoKeyDeclaresOne()
+    {
+        Assert.False(Result.Ok().TryGetHttpStatusCode(out _));
+        Assert.False(Result.Error(Plain).TryGetHttpStatusCode(out _));
+        Assert.Null(Result.Error<int>(Plain).GetHttpStatusCode());
+    }
+
+    [Fact]
+    public void TryGetHttpStatusCode_OnGenericResult_Works()
+    {
+        var result = Result.Error<int>(NotFound, Guid.NewGuid());
+
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, result.GetHttpStatusCode());
+    }
+}

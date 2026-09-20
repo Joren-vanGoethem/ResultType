@@ -1,7 +1,7 @@
 using JV.ResultUtilities.Extensions;
 using JV.ResultUtilities.ValidationMessage;
 
-namespace JV.ResultUtilities.FluentValidation;
+namespace JV.ResultUtilities.Validation;
 
 /// <summary>
 /// Default ValidationKeyDefinitions for built-in validation rules.

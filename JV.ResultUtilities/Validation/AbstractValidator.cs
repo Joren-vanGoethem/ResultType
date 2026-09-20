@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using JV.ResultUtilities.ValidationPipeline;
 
-namespace JV.ResultUtilities.FluentValidation;
+namespace JV.ResultUtilities.Validation;
 
 public abstract class AbstractValidator<T> : IValidator
 {

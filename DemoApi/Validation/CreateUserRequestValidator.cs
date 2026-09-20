@@ -1,6 +1,6 @@
 using DemoApi.Controllers;
 using DemoApi.Domain;
-using JV.ResultUtilities.FluentValidation;
+using JV.ResultUtilities.Validation;
 
 namespace DemoApi.Validation;
 

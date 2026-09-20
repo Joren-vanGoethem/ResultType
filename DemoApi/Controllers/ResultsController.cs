@@ -1,3 +1,6 @@
+using DemoApi.Domain;
+using JV.ResultUtilities;
+using JV.ResultUtilities.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoApi.Controllers;
@@ -15,6 +18,18 @@ public class ResultsController : ControllerBase
         // ResultExceptionHandler and returned as a translated ProblemDetails response.
 
         // save user with dbcontext etc.
+
+        return Ok();
+    }
+
+    [HttpGet("{id:guid}")]
+    [EndpointName("GetUser")]
+    public ActionResult GetUser(Guid id)
+    {
+        // The demo has no store, so every lookup fails. The key carries WithHttpStatus(404), so
+        // ThrowIfFailure() alone produces a 404 problem body — no HasError(...) → NotFound() ladder.
+        var result = Result.Error(ValidationKeys.User.NotFound, id);
+        result.ThrowIfFailure();
 
         return Ok();
     }

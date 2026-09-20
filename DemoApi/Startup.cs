@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using DemoApi.Translations;
 using DemoApi.Validation;
-using JV.ResultUtilities.FluentValidation;
+using JV.ResultUtilities.AspNetCore;
 using Microsoft.AspNetCore.Http.Features;
 using Tenant.Api.Translations;
 
@@ -27,8 +27,6 @@ public class Startup
     services.AddHttpContextAccessor();
 
     services.AddEndpointsApiExplorer();
-    services.AddProblemDetails();
-    
     services.AddLocalization();
 
     services.Configure<RequestLocalizationOptions>(options =>
@@ -44,18 +42,15 @@ public class Startup
     
     // Register the translator, just a basic IStringLocalizer wrapper with culture fallback to our default culture
     services.AddSingleton<ITranslator, Translator>();
-    
-    // custom exception handler for transforming a ResultException into ProblemDetails
-    services.AddExceptionHandler<ResultExceptionHandler>();
 
-    // register validators for auto-validation via the filter
-    services.AddSingleton<IValidator, CreateUserRequestValidator>();
-    services.AddSingleton<ValidateModelFilter>();
+    // ResultException -> ProblemDetails, translated through the resx adapter. The status comes from the
+    // key (see ValidationKeys.User.NotFound), so controllers call ThrowIfFailure() and nothing else.
+    services.AddResultProblemDetails<ResxResultMessageTranslator>();
 
-    services.AddControllers(options =>
-    {
-      options.Filters.AddService<ValidateModelFilter>();
-    });
+    // Every AbstractValidator<T> in this assembly runs against matching action arguments before the action.
+    services.AddResultValidation(typeof(Startup).Assembly);
+
+    services.AddControllers();
   }
 
   /// <summary>

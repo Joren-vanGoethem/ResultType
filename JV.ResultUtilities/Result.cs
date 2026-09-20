@@ -144,6 +144,23 @@ namespace JV.ResultUtilities
         public static Result Error(Result result)
             => new Result(result.ValidationMessages);
 
+        /// <summary>
+        /// Re-types a failed result as <see cref="Result{T}"/>, forwarding its messages. This is the explicit
+        /// spelling of the implicit <c>Result</c> → <c>Result&lt;T&gt;</c> conversion: prefer it in
+        /// <c>if (check.IsFailure) return Result.Fail&lt;Foo&gt;(check);</c>, where the intent is visible and a
+        /// refactor that drops the guard fails to compile instead of throwing at runtime.
+        /// Throws <see cref="InvalidOperationException"/> when <paramref name="failure"/> is successful.
+        /// </summary>
+        public static Result<T> Fail<T>(ResultType failure)
+        {
+            if (failure == null) throw new ArgumentNullException(nameof(failure));
+            if (failure.IsSuccessful)
+                throw new InvalidOperationException(
+                    "Result.Fail<T> requires a failed result; a successful Result carries no value to lift into Result<T>. Use Result.Ok(value).");
+
+            return Result<T>.Create(default!, failure.ValidationMessages);
+        }
+
         public static Result Error(IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
             => new Result(validationMessages);
 

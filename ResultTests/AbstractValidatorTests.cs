@@ -1,6 +1,6 @@
 using JV.ResultUtilities;
 using JV.ResultUtilities.Extensions;
-using JV.ResultUtilities.FluentValidation;
+using JV.ResultUtilities.Validation;
 using JV.ResultUtilities.ValidationMessage;
 
 namespace ResultTests;

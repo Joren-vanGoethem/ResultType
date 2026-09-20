@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace JV.ResultUtilities.FluentValidation;
+namespace JV.ResultUtilities.Validation;
 
 /// <summary>
 /// Non-generic validator interface for discovering and invoking validators without reflection.

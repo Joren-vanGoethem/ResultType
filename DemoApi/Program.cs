@@ -10,3 +10,6 @@ startup.ConfigureServices(builder.Services);
 var app = builder.Build();
 
 await startup.ConfigureAsync(app, args);
+
+// Lets DemoApi.Tests boot the app with WebApplicationFactory<Program>.
+public partial class Program;

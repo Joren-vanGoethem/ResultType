@@ -1,4 +1,4 @@
-namespace JV.ResultUtilities.FluentValidation;
+namespace JV.ResultUtilities.Validation;
 
 public static class CommonRuleExtensions
 {

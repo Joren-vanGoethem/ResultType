@@ -42,4 +42,7 @@
     <data name="Validation.Predicate" xml:space="preserve">
         <value>{0} is niet geldig</value>
     </data>
+    <data name="User.NotFound" xml:space="preserve">
+        <value>Gebruiker '{0}' is niet gevonden.</value>
+    </data>
 </root>
