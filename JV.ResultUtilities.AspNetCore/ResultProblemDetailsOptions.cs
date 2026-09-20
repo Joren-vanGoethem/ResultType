@@ -1,3 +1,4 @@
+using JV.ResultUtilities.Extensions;
 using JV.ResultUtilities.ValidationMessage;
 using Microsoft.Extensions.Logging;
 
@@ -56,7 +57,7 @@ public sealed class ResultProblemDetailsOptions
     /// <summary>
     /// Maps a key to a status without touching the key's declaration — for keys you do not own, or
     /// when the domain must stay free of HTTP numbers. A status declared on the key itself
-    /// (<see cref="HttpStatusMetadata.WithHttpStatus"/>) wins over this map.
+    /// (<c>WithHttpStatusCode</c> / <c>WithHttpStatus</c>) wins over this map.
     /// </summary>
     public ResultProblemDetailsOptions MapStatus(ValidationKeyDefinition key, int statusCode)
     {
@@ -68,8 +69,8 @@ public sealed class ResultProblemDetailsOptions
     /// <summary>Resolves the status for one message. Exposed for tests and custom handlers.</summary>
     public int ResolveStatus(ValidationMessage message)
     {
-        if (message.KeyDefinition != null && message.KeyDefinition.TryGetHttpStatus(out var declared))
-            return declared;
+        if (message.TryGetHttpStatusCode(out var declared))
+            return (int)declared;
 
         var key = message.KeyDefinition?.Key ?? message.TranslationKey;
         return _statusByKey.TryGetValue(key, out var mapped) ? mapped : DefaultStatusCode;

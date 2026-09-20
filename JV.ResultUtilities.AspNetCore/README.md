@@ -22,7 +22,8 @@ app.MapControllers();
 ```csharp
 // Domain: the key says what it is over HTTP
 public static readonly ValidationKeyDefinition NotFound =
-    ValidationKeyDefinition.Create("User.NotFound").WithGuidParameter("id").WithHttpStatus(404);
+    ValidationKeyDefinition.Create("User.NotFound").WithGuidParameter("id")
+        .WithHttpStatusCode(HttpStatusCode.NotFound);   // core helper; WithHttpStatus(404) is the int form
 
 // Controller: no HasError ladder
 var (result, user) = await service.GetAsync(id, ct);
@@ -51,7 +52,7 @@ The body:
 - The handler answers **only** `ResultException`. Anything else returns `false` and the framework's
   default handling logs it and writes a 500 with no exception message — so this package never leaks
   one.
-- Status per message: `WithHttpStatus` on the key, else `options.MapStatus`, else `DefaultStatusCode`
+- Status per message: `WithHttpStatusCode` (or the int `WithHttpStatus`) on the key, else `options.MapStatus`, else `DefaultStatusCode`
   (400). Several messages: all equal → that status; otherwise any 5xx → the highest, else the default.
 - Validation failures are logged at `Information` (configurable). They are client errors.
 

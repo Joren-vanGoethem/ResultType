@@ -140,6 +140,17 @@ public class ResultExceptionHandlerTests
     }
 
     [Fact]
+    public async Task KeyDeclaredWithTheEnumForm_IsHonouredToo()
+    {
+        var conflict = ValidationKeyDefinition.Create("User.EmailTaken").WithHttpStatusCode(System.Net.HttpStatusCode.Conflict);
+        var (handler, sink, _) = Create();
+
+        await handler.TryHandleAsync(Context(), Thrown(Result.Error(conflict)), CancellationToken.None);
+
+        Assert.Equal(409, sink.Captured!.Status);
+    }
+
+    [Fact]
     public async Task MapStatus_AppliesToKeysWithoutMetadata_ButMetadataWins()
     {
         var (handler, sink, _) = Create(o => o.MapStatus(Unmapped, 423).MapStatus(NotFound, 410));
@@ -299,7 +310,9 @@ public class HttpStatusMetadataTests
 
         Assert.True(key.TryGetHttpStatus(out var status));
         Assert.Equal(409, status);
-        Assert.Equal(409, key.Metadata[HttpStatusMetadata.Key]);
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, key.Metadata[HttpStatusMetadata.Key]);
+        Assert.True(key.TryGetHttpStatusCode(out var typed));
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, typed);
     }
 
     [Fact]
