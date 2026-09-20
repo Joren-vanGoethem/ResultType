@@ -4,17 +4,27 @@ on:
   push:
     tags:
     - "v*.*.*"
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # No long-lived secrets anywhere in this job:
+    # - packages: write lets the job's own GITHUB_TOKEN push to GitHub Packages (the PAT it
+    #   replaced expired and 401'd the v10.4.0 release).
+    # - id-token: write lets NuGet/login exchange a GitHub OIDC token for a one-hour nuget.org
+    #   API key, against the Trusted Publishing policy registered for this repo + workflow file.
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 10
+        dotnet-version: 10.0.x
     - name: Verify commit exists in origin/master
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
@@ -25,14 +35,20 @@ jobs:
       run: dotnet build --configuration Release /p:Version=${VERSION}
     - name: Test
       run: dotnet test --configuration Release /p:Version=${VERSION} --no-build
+    # --no-build and the same /p:Version as the build step, so the package carries the tag's
+    # version. Without /p:Version, pack rebuilt with the csproj's <Version> and the v10.3.0 tag
+    # silently re-published 10.2.0 (which --skip-duplicate then hid).
     - name: Pack
-      run: dotnet pack --configuration Release --output ./nupkgs
+      run: dotnet pack --configuration Release --no-build /p:Version=${VERSION} --output ./nupkgs
 
-      # Push to GitHub Packages
     - name: Push to GitHub Packages
-      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/joren-vangoethem/index.json" --api-key "${{ secrets.GH_PAT_NUGET_PUSH }}" --skip-duplicate 
-      
-      # Push to nuget.org
-    - name: Push to nuget.org
-      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/joren-vangoethem/index.json" --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
 
+    # Requested right before the push: the key it returns is valid for one hour.
+    - name: NuGet login (OIDC -> temporary API key)
+      id: nuget-login
+      uses: NuGet/login@v1
+      with:
+        user: Joren-vanGoethem   # nuget.org profile name that owns the Trusted Publishing policy
+    - name: Push to nuget.org
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
