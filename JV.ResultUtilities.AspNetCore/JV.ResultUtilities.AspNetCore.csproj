@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>14</LangVersion>
+        <Title>JV.ResultUtilities.AspNetCore</Title>
+        <Authors>Joren vanGoethem</Authors>
+        <Description>ASP.NET Core bridge for JV.ResultUtilities: a ResultException to RFC 9457 ProblemDetails exception handler with per-key HTTP status, structured errors and translation, plus request validation through AbstractValidator.</Description>
+        <RepositoryUrl>https://github.com/Joren-vanGoethem/ResultType</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Result Type;ProblemDetails;AspNetCore;Validation</PackageTags>
+        <Company>Joren vanGoethem</Company>
+        <Copyright>Copyright (c) Joren vanGoethem 2026</Copyright>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageId>JV.ResultUtilities.AspNetCore</PackageId>
+        <Product>JV.ResultUtilities.AspNetCore</Product>
+        <Version>11.0.0</Version>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\JV.ResultUtilities\JV.ResultUtilities.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="..\JV.ResultUtilities\icon.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+</Project>
