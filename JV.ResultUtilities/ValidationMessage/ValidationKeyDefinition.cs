@@ -6,6 +6,9 @@ namespace JV.ResultUtilities.ValidationMessage
 {
     public class ValidationKeyDefinition
     {
+        private static readonly IReadOnlyDictionary<string, object> EmptyMetadata =
+            new Dictionary<string, object>();
+
         public string Key { get; }
         public string TranslationKey { get; }
         public IReadOnlyList<ValidationParameter> Parameters { get; }
@@ -15,13 +18,23 @@ namespace JV.ResultUtilities.ValidationMessage
         /// </summary>
         public string? FieldName { get; }
 
+        /// <summary>
+        /// Arbitrary, immutable metadata attached to this key by the code that declares it — for example the
+        /// HTTP status an API layer should answer with, or a severity. The core library never reads it;
+        /// it exists so a key can carry meaning that only a consuming layer interprets, without that layer
+        /// having to keep a second registry keyed on the key string.
+        /// </summary>
+        public IReadOnlyDictionary<string, object> Metadata { get; }
+
         private ValidationKeyDefinition(string key, string translationKey,
-            IEnumerable<ValidationParameter> parameters, string? fieldName = null)
+            IEnumerable<ValidationParameter> parameters, string? fieldName = null,
+            IReadOnlyDictionary<string, object>? metadata = null)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
             TranslationKey = translationKey ?? throw new ArgumentNullException(nameof(translationKey));
             Parameters = parameters?.ToList().AsReadOnly() ?? new List<ValidationParameter>().AsReadOnly();
             FieldName = fieldName;
+            Metadata = metadata ?? EmptyMetadata;
         }
 
         /// <summary>
@@ -31,8 +44,38 @@ namespace JV.ResultUtilities.ValidationMessage
         {
             if (string.IsNullOrWhiteSpace(fieldName))
                 throw new ArgumentException($"'{nameof(fieldName)}' cannot be null or whitespace.", nameof(fieldName));
-            
-            return new ValidationKeyDefinition(Key, TranslationKey, Parameters, fieldName);
+
+            return new ValidationKeyDefinition(Key, TranslationKey, Parameters, fieldName, Metadata);
+        }
+
+        /// <summary>
+        /// Returns a copy of this key with <paramref name="value"/> stored under <paramref name="name"/> in
+        /// <see cref="Metadata"/>. An existing entry with the same name is replaced.
+        /// </summary>
+        public ValidationKeyDefinition WithMetadata(string name, object value)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace.", nameof(name));
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
+            var metadata = new Dictionary<string, object>(Metadata) { [name] = value };
+            return new ValidationKeyDefinition(Key, TranslationKey, Parameters, FieldName, metadata);
+        }
+
+        /// <summary>
+        /// Reads a metadata entry as <typeparamref name="T"/>. Returns false when the entry is absent or
+        /// holds a value of another type.
+        /// </summary>
+        public bool TryGetMetadata<T>(string name, out T value)
+        {
+            if (Metadata.TryGetValue(name, out var stored) && stored is T typed)
+            {
+                value = typed;
+                return true;
+            }
+
+            value = default!;
+            return false;
         }
 
         public static ValidationKeyDefinition Create(string key, string translationKey)
@@ -171,48 +214,46 @@ namespace JV.ResultUtilities.ValidationMessage
 
         public string[] FormatParameters(object parameters)
         {
-            if (!ValidateParameters(parameters))
+            var values = ResolveParameterValues(parameters);
+            var result = new string[values.Length];
+            for (int i = 0; i < values.Length; i++)
+            {
+                result[i] = Parameters[i].FormatValue(values[i]!);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Resolves the caller-supplied <paramref name="parameters"/> — positional array, single value,
+        /// dictionary, anonymous object or other enumerable — into one raw value per declared
+        /// <see cref="Parameters"/> entry, in declaration order, with defaults applied. This is the untyped
+        /// counterpart of <see cref="FormatParameters"/>; the two always agree on which value fills which slot.
+        /// </summary>
+        public object?[] ResolveParameterValues(object? parameters)
+        {
+            if (!ValidateParameters(parameters!))
                 throw new ArgumentException("Parameters do not match the required definition", nameof(parameters));
 
-            var result = new string[Parameters.Count];
+            var result = new object?[Parameters.Count];
 
             if (parameters == null)
             {
                 for (int i = 0; i < Parameters.Count; i++)
                 {
-                    result[i] = Parameters[i].FormatValue(Parameters[i].DefaultValue);
+                    result[i] = Parameters[i].DefaultValue;
                 }
             }
             else if (parameters is object[] positionalParams)
             {
                 for (int i = 0; i < Parameters.Count; i++)
                 {
-                    result[i] = Parameters[i].FormatValue(positionalParams[i] ?? Parameters[i].DefaultValue);
+                    result[i] = positionalParams[i] ?? Parameters[i].DefaultValue;
                 }
             }
             else if (parameters is string)
             {
-                if (Parameters.Count == 1)
-                {
-                    result[0] = Parameters[0].FormatValue(parameters);
-                }
-                else
-                {
-                    var targetIndex = -1;
-                    for (int i = 0; i < Parameters.Count; i++)
-                    {
-                        if (Parameters[i].DefaultValue == null)
-                        {
-                            targetIndex = i;
-                            break;
-                        }
-                    }
-
-                    for (int i = 0; i < Parameters.Count; i++)
-                    {
-                        result[i] = Parameters[i].FormatValue(i == targetIndex ? parameters : Parameters[i].DefaultValue);
-                    }
-                }
+                FillSingleValue(parameters, result);
             }
             else if (parameters is IDictionary<string, object> dictionaryParams)
             {
@@ -220,37 +261,30 @@ namespace JV.ResultUtilities.ValidationMessage
                 {
                     var parameter = Parameters[i];
                     dictionaryParams.TryGetValue(parameter.Name, out var value);
-                    result[i] = parameter.FormatValue(value ?? parameter.DefaultValue);
+                    result[i] = value ?? parameter.DefaultValue;
                 }
             }
             else if (parameters is System.Collections.IEnumerable enumerable)
             {
-                 var list = new List<object>();
-                 foreach (var item in enumerable) list.Add(item);
-                 if (list.Count == Parameters.Count)
-                 {
-                     for (int i = 0; i < Parameters.Count; i++)
-                     {
-                         result[i] = Parameters[i].FormatValue(list[i] ?? Parameters[i].DefaultValue);
-                     }
-                 }
-                 else if (Parameters.Count == 1 || Parameters.Count(p => p.DefaultValue == null) == 1)
-                 {
-                     var targetIndex = Parameters.Count == 1
-                         ? 0
-                         : Enumerable.Range(0, Parameters.Count).First(i => Parameters[i].DefaultValue == null);
-
-                     for (int i = 0; i < Parameters.Count; i++)
-                     {
-                         result[i] = Parameters[i].FormatValue(i == targetIndex ? parameters : Parameters[i].DefaultValue);
-                     }
-                 }
-                 else
-                 {
-                     // IEnumerable count didn't match and not a single-value scenario.
-                     // Fall through to anonymous object handling (the object may have named properties).
-                     FormatFromReflection(parameters, result);
-                 }
+                var list = new List<object>();
+                foreach (var item in enumerable) list.Add(item);
+                if (list.Count == Parameters.Count)
+                {
+                    for (int i = 0; i < Parameters.Count; i++)
+                    {
+                        result[i] = list[i] ?? Parameters[i].DefaultValue;
+                    }
+                }
+                else if (Parameters.Count == 1 || Parameters.Count(p => p.DefaultValue == null) == 1)
+                {
+                    FillSingleValue(parameters, result);
+                }
+                else
+                {
+                    // IEnumerable count didn't match and not a single-value scenario.
+                    // Fall through to anonymous object handling (the object may have named properties).
+                    ResolveFromReflection(parameters, result);
+                }
             }
             else
             {
@@ -265,21 +299,14 @@ namespace JV.ResultUtilities.ValidationMessage
 
                     if (targetParam.ValidateValue(parameters))
                     {
-                        var targetIndex = Parameters.Count == 1
-                            ? 0
-                            : Enumerable.Range(0, Parameters.Count).First(i => Parameters[i].DefaultValue == null);
-
-                        for (int i = 0; i < Parameters.Count; i++)
-                        {
-                            result[i] = Parameters[i].FormatValue(i == targetIndex ? parameters : Parameters[i].DefaultValue);
-                        }
+                        FillSingleValue(parameters, result);
                         handledAsSingleValue = true;
                     }
                 }
 
                 if (!handledAsSingleValue)
                 {
-                    FormatFromReflection(parameters, result);
+                    ResolveFromReflection(parameters, result);
                 }
             }
 
@@ -288,15 +315,30 @@ namespace JV.ResultUtilities.ValidationMessage
                 if (result[i] == null)
                 {
                     throw new InvalidOperationException(
-                        $"Parameter '{Parameters[i].Name}' at index {i} was not formatted. " +
-                        $"This indicates a mismatch between ValidateParameters and FormatParameters for input type '{parameters?.GetType().FullName}'.");
+                        $"Parameter '{Parameters[i].Name}' at index {i} was not resolved. " +
+                        $"This indicates a mismatch between ValidateParameters and ResolveParameterValues for input type '{parameters?.GetType().FullName}'.");
                 }
             }
 
             return result;
         }
 
-        private void FormatFromReflection(object parameters, string[] result)
+        /// <summary>
+        /// Places a single supplied value into the one slot that has no default, and defaults everywhere else.
+        /// </summary>
+        private void FillSingleValue(object value, object?[] result)
+        {
+            var targetIndex = Parameters.Count == 1
+                ? 0
+                : Enumerable.Range(0, Parameters.Count).First(i => Parameters[i].DefaultValue == null);
+
+            for (int i = 0; i < Parameters.Count; i++)
+            {
+                result[i] = i == targetIndex ? value : Parameters[i].DefaultValue;
+            }
+        }
+
+        private void ResolveFromReflection(object parameters, object?[] result)
         {
             var properties = parameters.GetType().GetProperties();
             var filteredProps = properties.Where(p => p.CanRead && p.GetIndexParameters().Length == 0).ToList();
@@ -308,7 +350,7 @@ namespace JV.ResultUtilities.ValidationMessage
                 {
                     var parameter = Parameters[i];
                     propDict.TryGetValue(parameter.Name, out var value);
-                    result[i] = parameter.FormatValue(value ?? parameter.DefaultValue);
+                    result[i] = value ?? parameter.DefaultValue;
                 }
             }
         }

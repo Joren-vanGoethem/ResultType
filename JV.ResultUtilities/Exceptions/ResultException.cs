@@ -9,7 +9,13 @@ namespace JV.ResultUtilities.Exceptions;
 [Serializable]
 public sealed class ResultException : Exception
 {
-  public IEnumerable<ValidationMessage.ValidationMessage> ValidationMessages { get; }
+  public IReadOnlyList<ValidationMessage.ValidationMessage> ValidationMessages { get; }
+
+  /// <summary>
+  /// The translation keys of <see cref="ValidationMessages"/>, in order, for log calls and tests that
+  /// branch on which failure occurred without re-deriving it from the messages.
+  /// </summary>
+  public IReadOnlyList<string> Keys => ValidationMessages.Select(m => m.TranslationKey).ToArray();
 
   public ResultException(Result result)
     : base(string.Join("; ", result.ValidationMessages.Select(m => m.MapToErrorMessage())))
@@ -32,13 +38,12 @@ public sealed class ResultException : Exception
   public ResultException(IList<ValidationMessage.ValidationMessage> validationMessages)
     : base(string.Join("; ", validationMessages.Select(m => m.MapToErrorMessage())))
   {
-    ValidationMessages = validationMessages;
+    ValidationMessages = validationMessages.ToArray();
   }
   
   public ResultException(IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
-    : base(string.Join("; ", validationMessages.Select(m => m.MapToErrorMessage())))
+    : this(validationMessages.ToArray())
   {
-    ValidationMessages = validationMessages;
   }
 
   public ResultException(ValidationKeyDefinition validationKey)

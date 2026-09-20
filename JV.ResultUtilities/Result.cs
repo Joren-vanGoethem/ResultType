@@ -34,7 +34,7 @@ namespace JV.ResultUtilities
         private Result(TValue value, IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
         {
             _value = value;
-            ValidationMessages = validationMessages;
+            SetValidationMessages(validationMessages);
         }
 
         public static Result<TValue> Create(TValue value)
@@ -99,12 +99,12 @@ namespace JV.ResultUtilities
     {
         private Result(IEnumerable<ValidationMessage.ValidationMessage> validationMessages)
         {
-            ValidationMessages = validationMessages;
+            SetValidationMessages(validationMessages);
         }
 
         private Result(ValidationMessage.ValidationMessage validationMessage)
         {
-            ValidationMessages = new[] { validationMessage };
+            SetValidationMessages([validationMessage]);
         }
 
         /// <summary>

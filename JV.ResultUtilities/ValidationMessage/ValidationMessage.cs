@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace JV.ResultUtilities.ValidationMessage
@@ -14,6 +15,15 @@ namespace JV.ResultUtilities.ValidationMessage
         /// Null when parameters were not preserved (e.g., lenient creation with no params).
         /// </summary>
         public object[]? RawParameters { get; }
+
+        /// <summary>
+        /// The raw parameter values keyed by the parameter names declared on <see cref="KeyDefinition"/>,
+        /// with defaults applied — the same values <see cref="Parameters"/> holds, before formatting and
+        /// with their names attached. This is what a structured error body should serialise: a client
+        /// can read <c>parameters.maximum</c> instead of guessing which <c>{n}</c> placeholder it was.
+        /// For a lenient message, names are matched by position and any surplus value is keyed by its index.
+        /// </summary>
+        public IReadOnlyDictionary<string, object?> NamedParameters { get; }
 
         protected ValidationMessage(ValidationKeyDefinition keyDefinition, object parameters)
         {
@@ -32,8 +42,13 @@ namespace JV.ResultUtilities.ValidationMessage
 
             KeyDefinition = keyDefinition;
             TranslationKey = keyDefinition.TranslationKey;
-            Parameters = keyDefinition.FormatParameters(parameters);
+            var resolved = keyDefinition.ResolveParameterValues(parameters);
+            Parameters = new string[resolved.Length];
+            for (var i = 0; i < resolved.Length; i++)
+                Parameters[i] = keyDefinition.Parameters[i].FormatValue(resolved[i]!);
+
             RawParameters = parameters is object[] arr ? arr : parameters != null ? [parameters] : null;
+            NamedParameters = ZipNames(keyDefinition, resolved);
         }
 
         private readonly record struct LenientMarker;
@@ -50,6 +65,22 @@ namespace JV.ResultUtilities.ValidationMessage
                 Parameters = rawParameters.Select(p => p?.ToString() ?? string.Empty).ToArray();
             else
                 Parameters = [];
+
+            NamedParameters = ZipNames(keyDefinition, rawParameters ?? []);
+        }
+
+        private static IReadOnlyDictionary<string, object?> ZipNames(ValidationKeyDefinition keyDefinition, object?[] values)
+        {
+            var named = new Dictionary<string, object?>(values.Length);
+            for (var i = 0; i < values.Length; i++)
+            {
+                var name = i < keyDefinition.Parameters.Count
+                    ? keyDefinition.Parameters[i].Name
+                    : i.ToString();
+                named[name] = values[i];
+            }
+
+            return named;
         }
 
         public static ValidationMessage Create(ValidationKeyDefinition keyDefinition, object parameters)
