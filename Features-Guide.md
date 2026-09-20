@@ -453,21 +453,36 @@ var fieldName = message.KeyDefinition.FieldName; // "email"
 ### Key Metadata
 
 Attach arbitrary, immutable metadata to a key so a consuming layer can read semantics the core library
-does not know about — the classic case is the HTTP status an API should answer with:
+does not interpret. The one entry the library *does* define a typed helper for is the HTTP status an API
+should answer with — `System.Net.HttpStatusCode` is a base-library type, so the domain can declare it
+without a web dependency:
 
 ```c#
 private static readonly ValidationKeyDefinition NotFoundKey =
     ValidationKeyDefinition.Create("user.not.found")
     .WithGuidParameter("id")
-    .WithMetadata("http.status", 404);
+    .WithHttpStatusCode(HttpStatusCode.NotFound);
 
-// Later, at the API boundary:
-if (message.KeyDefinition.TryGetMetadata<int>("http.status", out var status))
-    response.StatusCode = status;
+// At the API boundary — on the key, a message, or the whole result:
+if (message.KeyDefinition.TryGetHttpStatusCode(out var status)) ...
+if (result.TryGetHttpStatusCode(out var status))      // highest status across its messages
+    response.StatusCode = (int)status;                 // 409 outranks 404, 5xx outranks 4xx
+// else fall back to 400
 ```
 
-`WithMetadata` returns a copy (like `WithFieldName`), replaces an existing entry with the same name, and
-survives further `With…` calls in either order. The library itself never reads `Metadata`.
+Anything else goes through the general bag:
+
+```c#
+var key = ValidationKeyDefinition.Create("user.email.taken")
+    .WithMetadata("severity", "warning");
+
+key.TryGetMetadata<string>("severity", out var severity);  // "warning"
+```
+
+`WithMetadata` / `WithHttpStatusCode` return a copy (like `WithFieldName`), replace an existing entry with
+the same name, and survive further `With…` calls in either order. `ValidationKeyMetadata.HttpStatusCode`
+is the entry name the typed helpers use, so a value stored by hand under it (an `int` or an
+`HttpStatusCode`) is read back the same way.
 
 **Use Metadata when:** the meaning of a key (status code, severity, category) should live next to the key
 instead of in a second registry that has to be kept in sync.

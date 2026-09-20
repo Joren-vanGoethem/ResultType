@@ -34,7 +34,7 @@ validation messages).
   - [Functional Combinators](Features-Guide.md#functional-combinators) (Map, Bind, Match, Ensure, Do)
   - [Merging Results](Features-Guide.md#merging-results)
   - [Collection Operations](Features-Guide.md#collection-operations) (TraverseAll, TraversePartialWithErrors)
-  - [Validation Messages](Features-Guide.md#validation-messages) (Keys, Parameters, FieldName, Metadata, NamedParameters, CreateLenient, RawParameters, HasError)
+  - [Validation Messages](Features-Guide.md#validation-messages) (Keys, Parameters, FieldName, Metadata, HttpStatusCode, NamedParameters, CreateLenient, RawParameters, HasError)
   - [Validation Pipeline](Features-Guide.md#validation-pipeline) (Sync, Async, ShortCircuit)
   - [Exception Bridging](Features-Guide.md#exception-bridging)
   - [Async Pipelines](Features-Guide.md#async-pipelines)
