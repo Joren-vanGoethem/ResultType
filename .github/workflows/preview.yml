@@ -4,26 +4,36 @@ on:
   push:
     tags:
     - "v*.*.*-preview[0-9][0-9][0-9]"
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Same keyless setup as main.yml; see the comments there. A separate Trusted Publishing
+    # policy on nuget.org names this file (preview.yml).
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 10
+        dotnet-version: 10.0.x
     - name: Set VERSION variable from tag
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
-      run: dotnet pack --configuration Release --output ./nupkgs
+      run: dotnet pack --configuration Release /p:Version=${VERSION} --output ./nupkgs
 
-    # Push to GitHub Packages
     - name: Push to GitHub Packages
-      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/joren-vangoethem/index.json" --api-key "${{ secrets.GH_PAT_NUGET_PUSH }}" --skip-duplicate 
-      
-      # Push to nuget.org
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/joren-vangoethem/index.json" --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate
+
+    - name: NuGet login (OIDC -> temporary API key)
+      id: nuget-login
+      uses: NuGet/login@v1
+      with:
+        user: Joren-vanGoethem
     - name: Push to nuget.org
-      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "${{ secrets.NUGET_API_KEY }}" --skip-duplicate
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
